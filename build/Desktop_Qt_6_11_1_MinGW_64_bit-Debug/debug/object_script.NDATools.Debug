@@ -1,0 +1,12 @@
+debug/formtcpclient.o
+debug/formtcpserver.o
+debug/formudpclient.o
+debug/formudpserver.o
+debug/main.o
+debug/mainwidget.o
+debug/qrc_images.o
+debug/moc_formtcpclient.o
+debug/moc_formtcpserver.o
+debug/moc_formudpclient.o
+debug/moc_formudpserver.o
+debug/moc_mainwidget.o

@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWidget</class>
+ <widget class="QWidget" name="MainWidget">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>900</width>
+    <height>600</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>TCP/UDP网路调试助手</string>
+  </property>
+  <property name="windowIcon">
+   <iconset resource="images.qrc">
+    <normaloff>:/new/prefix1/images/NDALogo.ico</normaloff>:/new/prefix1/images/NDALogo.ico</iconset>
+  </property>
+  <widget class="QTabWidget" name="tab_Widget">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>10</y>
+     <width>881</width>
+     <height>581</height>
+    </rect>
+   </property>
+   <property name="currentIndex">
+    <number>3</number>
+   </property>
+   <widget class="FormTcpServer" name="tab_TCPServer">
+    <attribute name="icon">
+     <iconset resource="images.qrc">
+      <normaloff>:/new/prefix1/images/udpserver.ico</normaloff>:/new/prefix1/images/udpserver.ico</iconset>
+    </attribute>
+    <attribute name="title">
+     <string>TCP服务器</string>
+    </attribute>
+   </widget>
+   <widget class="FormTcpClient" name="tab_TCPClient">
+    <attribute name="icon">
+     <iconset resource="images.qrc">
+      <normaloff>:/new/prefix1/images/tcpclient.ico</normaloff>:/new/prefix1/images/tcpclient.ico</iconset>
+    </attribute>
+    <attribute name="title">
+     <string>TCP客户端</string>
+    </attribute>
+   </widget>
+   <widget class="FormUDPServer" name="tab_UDPServer">
+    <attribute name="icon">
+     <iconset resource="images.qrc">
+      <normaloff>:/new/prefix1/images/udpserver.ico</normaloff>:/new/prefix1/images/udpserver.ico</iconset>
+    </attribute>
+    <attribute name="title">
+     <string>UDP服务器</string>
+    </attribute>
+   </widget>
+   <widget class="FormUDPClient" name="tab_UDPClient">
+    <attribute name="icon">
+     <iconset resource="images.qrc">
+      <normaloff>:/new/prefix1/images/tcpclient.ico</normaloff>:/new/prefix1/images/tcpclient.ico</iconset>
+    </attribute>
+    <attribute name="title">
+     <string>UDP客户端</string>
+    </attribute>
+   </widget>
+   <widget class="QWidget" name="tab_DataExchange">
+    <attribute name="icon">
+     <iconset resource="images.qrc">
+      <normaloff>:/new/prefix1/images/sendmsg.ico</normaloff>:/new/prefix1/images/sendmsg.ico</iconset>
+    </attribute>
+    <attribute name="title">
+     <string>数据处理工具</string>
+    </attribute>
+   </widget>
+  </widget>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>FormTcpServer</class>
+   <extends>QWidget</extends>
+   <header>formtcpserver.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>FormTcpClient</class>
+   <extends>QWidget</extends>
+   <header>formtcpclient.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>FormUDPServer</class>
+   <extends>QWidget</extends>
+   <header>formudpserver.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>FormUDPClient</class>
+   <extends>QWidget</extends>
+   <header>formudpclient.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
+ <resources>
+  <include location="images.qrc"/>
+ </resources>
+ <connections/>
+</ui>
