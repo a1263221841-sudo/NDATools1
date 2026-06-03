@@ -64,10 +64,43 @@ public:
 
 private:
     ErrorHandler(const ErrorHandler&) =delete;
-    ErrorHandler
+    ErrorHandler operator=(const ErrorHandler&) =delete;
+
+    QFile *logFile ;  //当前打开的日志文件句柄
+    QTextStream *logStream ; //配套文本流,负责写入编码与刷新
+    QMutex logMutex;  //保护logFile/logStream 互斥锁
+    bool LoggingEnabled; //总开关
+
+    //功能:初始化,切换当前日志,创建目录与文件
+    void initializeLogFile();
+
+    //功能:在持锁状态写入日志行并刷新
+    void writeToLog(const QString &message);
+
+    //功能:按大小滚动日志文件
+    void rolloverIfNeeded_unlocked(qint64 maxBytes =5 * 1024 *1024);
+
+    //功能:当前的日志文件路径
+    QString currentLogPath ;
+
+    //功能:按日期切换日志(需要先持锁)
+    void reopenForToday_unlocked();
 
 
 signals:
 };
+
+//定义宏,统一日志格式,和默认的等级
+#define LOG_ERROR(context,message) \
+ErrorHandler::instance().logError(context,message,ErrorHandler::Crtical);  //记录严重错误
+
+#define LOG_WARNING(context,message) \
+ErrorHandler::instance().logError(context,message,ErrorHandler::Warning);  //记录警告
+
+#define LOG_INFO(context,message)  \
+ErrorHandler::instance().logError(context,message,ErrorHandler::Info);  //记录信息
+
+#define HANDLE_ERROR(type,level,message,parent) \
+ErrorHandler::instance().handleError(type,level,message,parent);  //弹窗并记录,统一出口
 
 #endif // ERRORHANDLER_H

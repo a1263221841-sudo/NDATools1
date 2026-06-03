@@ -1,3 +1,4 @@
+release/errorhandler.o
 release/formtcpclient.o
 release/formtcpserver.o
 release/formudpclient.o
@@ -5,6 +6,7 @@ release/formudpserver.o
 release/main.o
 release/mainwidget.o
 release/qrc_images.o
+release/moc_errorhandler.o
 release/moc_formtcpclient.o
 release/moc_formtcpserver.o
 release/moc_formudpclient.o
