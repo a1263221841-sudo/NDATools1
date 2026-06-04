@@ -195,7 +195,7 @@
       <normaloff>:/new/prefix1/images/exit.ico</normaloff>:/new/prefix1/images/exit.ico</iconset>
     </property>
    </widget>
-   <widget class="QComboBox" name="comboBox_TCPClientIp">
+   <widget class="QComboBox" name="comboBox_TCPClientIP">
     <property name="geometry">
      <rect>
       <x>20</x>

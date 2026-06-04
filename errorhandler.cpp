@@ -17,7 +17,7 @@
 
 ErrorHandler::ErrorHandler(QObject *parent)
     : QObject{parent}
-    ,lofFile(nullptr)  //日志文件指针
+    ,logFile(nullptr)  //日志文件指针
     ,logStream(nullptr)  //文本流指针
     ,LoggingEnabled(nullptr)  //默认开启日志
     ,currentLogPath()    //当前日志路径
@@ -48,16 +48,16 @@ ErrorHandler& ErrorHandler::instance()
 void ErrorHandler::handleError(ErrorType type,ErrorLevel level,const QString &message ,QWidget *parent)
 {
     //先写日志 context取自错误类型
-    QString context =ErrorTypeToString(type);
+    QString context =errorTypeToString(type);
     logError(context,message,level);
 
     //再根据级别弹出消息框
     QMessageBox::Icon icon;
-    QString titile;
+    QString title;
 
     switch(level){ //映射
     case Info:
-        icon = QMessageBox::information;  //信息图标
+        icon = QMessageBox::Information;  //信息图标
         title="信息";
         break;
     case Warning:
@@ -80,8 +80,8 @@ void ErrorHandler::handleError(ErrorType type,ErrorLevel level,const QString &me
     msgBox.setIcon(icon);  //设置图标
     msgBox.setWindowTitle(title);  //设置标题
     msgBox.setText(message);  //设置文本
-    msgBox.setStandardButtons(QMessageBox::OK);  //仅确认按扭
-    megBox.exec();   //阻塞显示
+    msgBox.setStandardButtons(QMessageBox::Ok);  //仅确认按扭
+    msgBox.exec();   //阻塞显示
 
 
     //Fatal 级别的,记录之后直接退出应用
@@ -103,7 +103,7 @@ void ErrorHandler::logError(const QString &context,const QString &error,ErrorLev
     reopenForToday_unlocked();  //按日期判断是否切换
 
     QString timestamp =QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss");
-    QString levelStr =ErrorLevelToString(level);
+    QString levelStr =errorLevelToString(level);
 
     //统一日志格式:[时间][级别][来源] 内容
     QString logMessage =QString ("[%1] [%2] [%3] %4")
@@ -124,7 +124,7 @@ void ErrorHandler::setLogFile(const QString &filename)
         delete logStream;
         logStream=nullptr;
     }
-    if(lofFile){
+    if(logFile){
         logFile->close();
         delete logFile;
         logFile =nullptr;
@@ -133,44 +133,151 @@ void ErrorHandler::setLogFile(const QString &filename)
     //尝试打开新的日志文件(追加模式)
 
     logFile =new QFile(filename);
+    if(logFile->open(QIODevice::WriteOnly | QIODevice::Append)){
+        logStream = new QTextStream(logFile);  //绑定文本流
+        currentLogPath= filename;    //记录当前的路径
+
+#if QT_VERSION<QT_VERSION_CHECK(6,0,0)
+        logStream->setCodec("UTF-8");    //QT5设置编码
+#else
+        logStream->setEncoding(QStringConverter::Utf8);
+#endif
+    }else{  //打开失败  ,释放指针
+        delete logFile;
+        logFile=nullptr;
+        qWarning() <<"无法打开日志文件"<<filename;
+
+    }
 
 }
 
 //功能 :开启/关闭日志写盘
 void ErrorHandler::setLoggingEnabled(bool enabled)
 {
-
+    LoggingEnabled = enabled;  //简单文件,未持锁因bool原子读写即可
 }
 
 //功能:错误来源枚举转可读字符串
-QString ErrorHandler::ErrorTypeToString(ErrorType type)
+QString ErrorHandler::errorTypeToString(ErrorType type)
 {
-
+    switch(type){    //枚举转可读字符串
+    case NetworkError  : return "网络错误";
+    case ValidationError :return "验证错误";
+    case FileError:  return "文件错误";
+    case ConfigError :return "配置错误";
+    case UnknownError :
+    default :return "未知错误";  //兜底,避免空字符串
+    }
 }
 
-
+QString ErrorHandler::errorLevelToString(ErrorLevel level)
+{
+    switch(level){
+    case Info: return "信息";
+    case Warning:return "警告";
+    case Critical: return "错误";
+    case Fatal: return "致命";
+    default: return"未知";   //兜底,避免空字符串
+    }
+}
 
 //功能:初始化,切换当前日志,创建目录与文件
 void ErrorHandler::initializeLogFile()
 {
+    //目录日志;使用AppDataLocation的父目录,与QSettings配置文件在同一目录
+    // AppDataLocation = %APPDATA%\NDATools\NDATools
+    // 使用父目录 = %APPDATA%\NDATools，与INI文件在同一目录
+    QString appDataPath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+    QDir appDataDir(appDataPath);  //关联回滚日志
+    QString logDir = appDataPath;
+
+    // 如果路径以应用名称结尾（如 ...\NDATools\NDATools），则使用父目录
+    // 这样日志文件和INI配置文件都在 %APPDATA%\NDATools 目录下
+
+    QString appName= QApplication::applicationName();
+    if(!appName.isEmpty() &&(appDataPath.endsWith("/" +appName) ||appDataPath.endsWith("\\" +appName))){
+        QDir parentDir =appDataPath;
+        if(parentDir.cdUp()){  //进入父目录
+            logDir = parentDir.absolutePath();
+
+        }
+    }
+
+    QDir().mkpath(logDir); //确保目录存在
+
+    qDebug() << "日志文件目录:" << logDir;
+    // 日志文件名：按日期分片，比如：NDATools_20260101.log
+    QString logFileName =QString("%1/NDATools_%2.log").arg(logDir).arg(QDate::currentDate().toString("yyyymmdd"));
+
+    setLogFile(logFileName);
+    if(logStream){
+        writeToLog("===NDATools启动===");
+    }
 
 }
 
 //功能:在持锁状态写入日志行并刷新
 void ErrorHandler::writeToLog(const QString &message)
 {
-
+    if(logStream){  //仅在流可用时写入
+        *logStream<<message<<Qt::endl;  //刷新缓冲区
+        logStream->flush();     //再显示刷新,确保立即落盘
+    }
 }
 
 //功能:按大小滚动日志文件
 void ErrorHandler::rolloverIfNeeded_unlocked(qint64 maxBytes)
 {
+    if(currentLogPath.isEmpty() || !logFile) return ;  //未初始化则跳过
+    QFileInfo info(*logFile);  //查询当前的大小
+    if(info.size() < maxBytes) return ;   //未超阈值则不滚动
 
+    //生成带时间戳的滚动文件名
+    QString timeSuffix = QDateTime::currentDateTime().toString("yyyymmdd_hhmmss");
+    QString rolled = currentLogPath;
+    rolled.replace(".log",QString("_%1.log").arg(timeSuffix));   //替换文件名
+
+    logStream->flush();  //刷新缓存
+    logFile->close();       //关闭当前的文件
+    QFile::rename(currentLogPath,rolled);   //重命名为历史文件
+
+    //释放旧指针
+    delete logStream;
+    delete logFile;
+    logStream =nullptr;
+    logFile =nullptr;
+
+    setLogFile(currentLogPath);    //重新创建一个同名新文件
 }
 
 
 //功能:按日期切换日志(需要先持锁)
 void ErrorHandler::reopenForToday_unlocked()
 {
+    if(currentLogPath.isEmpty()) return;   //未初始化则跳过
+    QString today =QDate::currentDate().toString("yyyyMMdd");  //今日日期
+    if(currentLogPath.contains(today)) return ;    //已是今日文件则不切换
+
+    QString appDataPath =QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+        QDir appDataDir(appDataPath);
+    //如果路径以应用名称结尾,则使用父目录(与initialzeLogFile逻辑一致)
+    QString appName=QApplication::applicationName();
+        if(!appName.isEmpty() && (appDataPath.endsWith("/" +appName) ||appDataPath.endsWith("\\"  +appName))){
+        QDir parentDir =appDataDir;
+            if(parentDir.cdUp()){
+            appDataPath = parentDir.absolutePath();
+            }
+        }
+        QDir().mkpath(appDataPath);   //确保目录存在
+        QString newPath =QString ("%1/NDAssistantTools_%2.log").arg(appDataPath).arg(today); //新日期文件
+
+        logStream->flush();
+        logFile->close();
+        delete logStream;
+        delete logFile;  //释放文件
+        logStream =nullptr;
+        logStream= nullptr;
+        setLogFile(newPath);  //打开新日期文件
+
 
 }

@@ -40,7 +40,7 @@ public:
     enum ErrorLevel{
         Info,
         Warning,
-        Crtical,
+        Critical,
         Fatal,  //致命错误 (会触发退出)
     };
 
@@ -59,8 +59,12 @@ public:
     //功能 :开启/关闭日志写盘
     void setLoggingEnabled(bool enabled);
 
-    //功能:错误来源枚举转可读字符串
-    static QString ErrorTypeToString(ErrorType type);
+    // 功能：错误来源枚举转可读字符串
+    static QString errorTypeToString(ErrorType type);
+
+    // 功能：错误级别枚举转可读字符串
+    static QString errorLevelToString(ErrorLevel level);
+
 
 private:
     ErrorHandler(const ErrorHandler&) =delete;
