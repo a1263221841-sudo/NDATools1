@@ -11,7 +11,7 @@
 #include <QRegularExpression>  //正则效验
 #include <QString>
 #include <QDateTime>
-#include <QSetting>    //持久化最近配置
+//#include <QSetting>    //持久化最近配置
 #include <QTextCursor> //文本光标
 #include <QPlainTextEdit>
 #include <QFile>

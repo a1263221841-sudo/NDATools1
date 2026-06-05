@@ -36,7 +36,7 @@ public:
     QPushButton *pushButton_TCPClientConnect;
     QPushButton *pushButton_TCPClientDisconnect;
     QPushButton *pushButton_TCPClientQuit;
-    QComboBox *comboBox_TCPClientIp;
+    QComboBox *comboBox_TCPClientIP;
     QGroupBox *groupBox_3;
     QPlainTextEdit *plainTextEdit_TCPClientSendData;
     QPushButton *pushButton_TCPClientSendMsg;
@@ -97,11 +97,11 @@ public:
         QIcon icon2;
         icon2.addFile(QString::fromUtf8(":/new/prefix1/images/exit.ico"), QSize(), QIcon::Mode::Normal, QIcon::State::Off);
         pushButton_TCPClientQuit->setIcon(icon2);
-        comboBox_TCPClientIp = new QComboBox(groupBox_2);
-        comboBox_TCPClientIp->addItem(QString());
-        comboBox_TCPClientIp->setObjectName("comboBox_TCPClientIp");
-        comboBox_TCPClientIp->setGeometry(QRect(20, 50, 161, 31));
-        comboBox_TCPClientIp->setFont(font);
+        comboBox_TCPClientIP = new QComboBox(groupBox_2);
+        comboBox_TCPClientIP->addItem(QString());
+        comboBox_TCPClientIP->setObjectName("comboBox_TCPClientIP");
+        comboBox_TCPClientIP->setGeometry(QRect(20, 50, 161, 31));
+        comboBox_TCPClientIP->setFont(font);
         groupBox_3 = new QGroupBox(FormTcpClient);
         groupBox_3->setObjectName("groupBox_3");
         groupBox_3->setGeometry(QRect(620, 360, 211, 191));
@@ -137,7 +137,7 @@ public:
         pushButton_TCPClientConnect->setText(QCoreApplication::translate("FormTcpClient", "\350\277\236\346\216\245\346\234\215\345\212\241\345\231\250", nullptr));
         pushButton_TCPClientDisconnect->setText(QCoreApplication::translate("FormTcpClient", "\346\226\255\345\274\200\346\234\215\345\212\241\345\231\250", nullptr));
         pushButton_TCPClientQuit->setText(QCoreApplication::translate("FormTcpClient", "\351\200\200\345\207\272\347\250\213\345\272\217", nullptr));
-        comboBox_TCPClientIp->setItemText(0, QCoreApplication::translate("FormTcpClient", "127.0.0.1", nullptr));
+        comboBox_TCPClientIP->setItemText(0, QCoreApplication::translate("FormTcpClient", "127.0.0.1", nullptr));
 
         groupBox_3->setTitle(QCoreApplication::translate("FormTcpClient", "\345\256\242\346\210\267\347\253\257\346\265\213\350\257\225\346\266\210\346\201\257", nullptr));
         pushButton_TCPClientSendMsg->setText(QCoreApplication::translate("FormTcpClient", "\345\217\221\351\200\201\346\266\210\346\201\257", nullptr));
