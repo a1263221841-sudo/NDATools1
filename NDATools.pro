@@ -12,8 +12,10 @@ SOURCES += \
     formtcpserver.cpp \
     formudpclient.cpp \
     formudpserver.cpp \
+    inputvalidator.cpp \
     main.cpp \
-    mainwidget.cpp
+    mainwidget.cpp \
+    network.cpp
 
 HEADERS += \
     errorhandler.h \
@@ -21,7 +23,9 @@ HEADERS += \
     formtcpserver.h \
     formudpclient.h \
     formudpserver.h \
-    mainwidget.h
+    inputvalidator.h \
+    mainwidget.h \
+    network.h
 
 FORMS += \
     formtcpclient.ui \

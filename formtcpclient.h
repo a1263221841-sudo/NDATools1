@@ -11,7 +11,7 @@
 #include <QRegularExpression>  //正则效验
 #include <QString>
 #include <QDateTime>
-//#include <QSetting>    //持久化最近配置
+#include <QSettings>    //持久化最近配置
 #include <QTextCursor> //文本光标
 #include <QPlainTextEdit>
 #include <QFile>
@@ -22,7 +22,7 @@
 #include <QDir>   //目录操作
 
 #include "network.h"  //自定义网络通信封装(连接/发放)
-#include "error.h"  //错误统一处理
+#include "errorhandler.h"  //错误统一处理
 #include "inputvalidator.h"  //输入校验工具,(ip端口)
 
 namespace Ui {

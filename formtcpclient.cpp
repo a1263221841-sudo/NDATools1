@@ -151,7 +151,17 @@ FormTcpClient::FormTcpClient(QWidget *parent)
             trimLog();  //裁剪日志
         });
 
-        connect()
+        connect(&NetworkClient,&Network::dataReceied,this ,[this](const QString &data){  //绑定"收到数据:的信号
+            // 性能优化：appendPlainText会自动移动到底部，不需要手动设置cursor
+            QString strTemp = QString("\n[%1] 接收: %2")               // 拼接时间戳与内容
+                                  .arg(QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss"))
+                                  .arg(data);
+            ui->plainTextEdit_TCPClientMsgList->appendPlainText(strTemp); // 追加日志（自动滚动到底部）
+
+            trimLog();                                                 // 裁剪日志
+
+
+        });
 }
 
 FormTcpClient::~FormTcpClient()
@@ -162,7 +172,20 @@ FormTcpClient::~FormTcpClient()
 //发送连接,验证ip/端口,保存最近配置并请示连接
 void FormTcpClient::on_pushButton_TCPClientConnect_clicked()
 {
+    try{
+        if(!ui->pushButton_TCPClientConnect->isEnabled()){  //防止按扭被禁用时误触
+            qDebug()  << "Connection button is disabled ,ignoring click";
+            return;
+        }
+        connected = false ; //重置连接状态,等待结果
 
+        QString ipAddress = ui->comboBox_TCPClientIP->currentText();  //读取
+        int port = ui->spinBox_TCPClientPort->value() ; //读取端口
+
+        auto ipValidation = InputValidator::validatorNetworkAddress(ipAddress);
+
+
+    }
 }
 
 //断开连接 关闭socket并重置ui
