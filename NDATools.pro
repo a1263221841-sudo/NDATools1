@@ -1,4 +1,8 @@
 QT += widgets
+QT       += core gui
+# 网络模块：提供TCP/UDP套接字功能
+QT += network
+QT += concurrent
 
 CONFIG += c++17
 

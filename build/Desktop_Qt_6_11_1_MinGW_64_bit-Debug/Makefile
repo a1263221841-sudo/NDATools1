@@ -309,6 +309,8 @@ Makefile: ../../NDATools.pro E:/qt6/6.11.1/mingw_64/mkspecs/win32-g++/qmake.conf
 		../../NDATools.pro \
 		E:/qt6/6.11.1/mingw_64/lib/Qt6Widgets.prl \
 		E:/qt6/6.11.1/mingw_64/lib/Qt6Gui.prl \
+		E:/qt6/6.11.1/mingw_64/lib/Qt6Network.prl \
+		E:/qt6/6.11.1/mingw_64/lib/Qt6Concurrent.prl \
 		E:/qt6/6.11.1/mingw_64/lib/Qt6Core.prl \
 		E:/qt6/6.11.1/mingw_64/lib/Qt6EntryPoint.prl \
 		E:/qt6/6.11.1/mingw_64/mkspecs/features/build_pass.prf \
@@ -553,6 +555,8 @@ E:/qt6/6.11.1/mingw_64/mkspecs/features/lex.prf:
 ../../NDATools.pro:
 E:/qt6/6.11.1/mingw_64/lib/Qt6Widgets.prl:
 E:/qt6/6.11.1/mingw_64/lib/Qt6Gui.prl:
+E:/qt6/6.11.1/mingw_64/lib/Qt6Network.prl:
+E:/qt6/6.11.1/mingw_64/lib/Qt6Concurrent.prl:
 E:/qt6/6.11.1/mingw_64/lib/Qt6Core.prl:
 E:/qt6/6.11.1/mingw_64/lib/Qt6EntryPoint.prl:
 E:/qt6/6.11.1/mingw_64/mkspecs/features/build_pass.prf:

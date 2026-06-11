@@ -108,7 +108,7 @@ FormTcpClient::FormTcpClient(QWidget *parent)
         QSettings settings;  //使用默认组织,应用存储
         qDebug()<< "QSettings配置文件路径:" <<settings.fileName();  //输出配置文件路径
         const QString lastIp =settings.value("TCPClinet/lastIp","127.0.0.1").toString();
-        const int lastPort = setting.value("TCPClient/lastIp",ui->spinBox_TCPClientPort->value()).toInt(); //读取上次端口,默认当前的spinBox
+        const int lastPort = settings.value("TCPClient/lastIp",ui->spinBox_TCPClientPort->value()).toInt(); //读取上次端口,默认当前的spinBox
 
         int index = ui->comboBox_TCPClientIP->findText(lastIp);
         if(index >= 0){

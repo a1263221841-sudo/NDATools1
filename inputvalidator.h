@@ -8,6 +8,8 @@
 #include <QRegularExpression>   // Qt正则表达式类，用于模式匹配和校验
 #include <QHostAddress>   //Qt主机地址类，用于解析和验证IP地址
 #include <QAbstractSocket>  //qt抽象套接字类,提供协议枚举
+
+//using ValidationResult = InputValidator::ValidationResult;
 #ifdef _MSC_VER
 #pragma execution_character_set("utf-8")
 #endif
@@ -20,13 +22,14 @@ public:
     struct ValidationResult{
         bool isValid;
         QString errorMessage;
+
         ValidationResult(bool valid =true ,const QString &message = QString())
             : isValid(valid),
             errorMessage(message){}
     };
 
     //ip地址校验函数,验证输入的字符串是否为有效的ipv4或ipv6地址
-    static ValidationResult validatorIPAddress(const QString &ipAdress);
+    static ValidationResult validatorIPAddress(const QString &ipAddress);
 
     //端口数值校验函数:验证整数端口是否在有效范围内
     static ValidationResult validatorPort(int port);
@@ -44,7 +47,7 @@ public:
     static ValidationResult validatorFilePath(const QString &filePath, bool mustExist = false);
 
     //非空字符串校验函数:验证字符串不为空且不仅包含空白字符串
-    static ValidationResult validatorEmptyString(const QString &str,const QString &fileName = "字段" );
+    static ValidationResult validatorNonEmptyString(const QString &str,const QString &fieldName = "字段" );
 
     //字符串长度区间校验函数,验证字符串函数是否在指定范围内(闭区间)
     static ValidationResult validatorStringLength(const QString &str,int minLength,int maxLength,const QString &fieldName = "字段");
