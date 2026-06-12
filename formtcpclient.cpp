@@ -114,11 +114,11 @@ FormTcpClient::FormTcpClient(QWidget *parent)
         if(index >= 0){
             ui->comboBox_TCPClientIP->setCurrentIndex(index);  //已存在则选中
         }else{
-            ui->comboBox_TCPClientIP->setEditable(lastIp);  //不存在则直接填入可编辑框
+            ui->comboBox_TCPClientIP->setEditText(lastIp);  //不存在则直接填入可编辑框
 
         }
         if(lastPort >= ui->spinBox_TCPClientPort->minimum()&&lastPort <= ui->spinBox_TCPClientPort->maximum()){
-            ui->spinBox_TCPClientPort->setValue(lastIp);
+            ui->spinBox_TCPClientPort->setValue(lastPort);
         }
 }
 
@@ -151,22 +151,33 @@ FormTcpClient::FormTcpClient(QWidget *parent)
             trimLog();  //裁剪日志
         });
 
-        connect(&NetworkClient,&Network::dataReceied,this ,[this](const QString &data){  //绑定"收到数据:的信号
+        connect(&NetworkClient,&Network::dataReceived,this ,[this](const QString &data){  //绑定"收到数据:的信号
             // 性能优化：appendPlainText会自动移动到底部，不需要手动设置cursor
             QString strTemp = QString("\n[%1] 接收: %2")               // 拼接时间戳与内容
                                   .arg(QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss"))
                                   .arg(data);
-            ui->plainTextEdit_TCPClientMsgList->appendPlainText(strTemp); // 追加日志（自动滚动到底部）
+            ui->listWidget_TCPClientMsg->appendPlainText(strTemp); // 追加日志（自动滚动到底部）
 
             trimLog();                                                 // 裁剪日志
 
 
         });
 }
-
+//析构函数,释放ui,Network内部自管资源
 FormTcpClient::~FormTcpClient()
 {
-    delete ui;
+    qDebug()<<"FormTcpClient析构函数开始";
+    try{
+        if(ui){
+            delete ui;
+            ui=nullptr;
+        }
+    }catch(const std::exception& e){
+        qWarning()<<"FormTcpClient析构函数发生异常:"<<e.what();
+    }catch(...){
+        qWarning()<<"FormTcpClient析构时发生未知异常";
+    }
+    qDebug()<<"FormTcpClient析构函数结束";
 }
 
 //发送连接,验证ip/端口,保存最近配置并请示连接
@@ -182,30 +193,107 @@ void FormTcpClient::on_pushButton_TCPClientConnect_clicked()
         QString ipAddress = ui->comboBox_TCPClientIP->currentText();  //读取
         int port = ui->spinBox_TCPClientPort->value() ; //读取端口
 
-        auto ipValidation = InputValidator::validatorNetworkAddress(ipAddress);
+        auto ipValidation = InputValidator::validatorNetworkAddress(ipAddress);   //校验ip/主机名
+        if(!ipValidation.isValid){
+            HANDLE_ERROR(ErrorHandler::ValidationError,ErrorHandler::Warning,ipValidation.errorMessage,this); //弹出警告
+            ui->comboBox_TCPClientIP->setFocus();  //聚焦便于修改
+            return;
+        }
+        auto portValidation= InputValidator::validatorPort(port);  //效验端口范围
+        if(!portValidation.isValid){
+            HANDLE_ERROR(ErrorHandler::ValidationError, ErrorHandler::Warning,
+                         portValidation.errorMessage, this);    // 弹警告
+            ui->spinBox_TCPClientPort->setFocus();              // 聚焦端口
+            return;
+        }
 
+        LOG_INFO("TCP客户端",QString("尝试连接到 %1:%2").arg(ipAddress).arg(port)); // 记录连接意图
 
+        {                                           // 持久化最新IP/端口
+            QSettings settings;
+            settings.setValue("TCPClient/lastIp", ipAddress);
+            settings.setValue("TCPClient/lastPort", port);
+            settings.sync();                                   // 立即同步到磁盘，确保数据保存
+        }
+        ui->pushButton_TCPClientConnect->setEnabled(false);     // 禁用连接按钮
+        ui->pushButton_TCPClientDisconnect->setEnabled(true);   // 允许断开
+
+        NetworkClient.ClientConnectToServer(ipAddress, port);   // 发起连接
+
+        QString strTemp = QString("[%1] 正在连接到 %2:%3...")        //追加正在连接日志
+                              .arg(QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss"))
+                              .arg(ipAddress)
+                              .arg(port);
+        ui->listWidget_TCPClientMsg->appendPlainText(strTemp) ;//appendPlainText会自动滚到底部
+    }catch(const std::exception &e){    //捕获标准异常
+        LOG_ERROR("TCP客户端",QStirng("连接时发生异常: %1").arg(e.what()));
+        HANDLE_ERROR(ErrorHandler::UnknownError, ErrorHandler::Critical,QString("连接时发生异常:%1").arg(e.what()),this);
+
+        ui->pushButton_TCPClientConnect->setEnabled(true);
+        ui->pushButton_TCPClientDisconnect->setEnabled(false);
+
+    }catch(...){
+        LOG_ERROR("TCP客户端","连接时发生未知异常");
+        HANDLE_ERROR(ErrorHandler::UnknownError, ErrorHandler::Critical,
+                     "连接时发生未知异常", this);
+        ui->pushButton_TCPClientConnect->setEnabled(true);
+        ui->pushButton_TCPClientDisconnect->setEnabled(false);
     }
 }
 
 //断开连接 关闭socket并重置ui
 void FormTcpClient::on_pushButton_TCPClientDisconnect_clicked()
 {
+    NetworkClient.DisconnectFromHost(); //主动断开连接
 
+    ui->pushButton_TCPClientConnect->setEnabled(true);          // 允许重新连接
+    ui->pushButton_TCPClientDisconnect->setEnabled(false);      // 禁用断开
+    ui->pushButton_TCPClientSendMsg->setEnabled(false);         // 禁用发送
+    ui->checkBox_TCPClientAutoText->setEnabled(false);       // 禁用自动测试
+    ui->plainTextEdit_TCPClientSendData->setEnabled(false);     // 禁用输入框
+    connected = false;                                          // 更新状态
+
+
+     ui->listWidget_TCPClientMsg->addItem("\n[Prompt:Disconnect from server]"); // 记录提示（自动滚动到底部）
 }
 
 //关闭窗口
 void FormTcpClient::on_pushButton_TCPClientClose_clicked()
 {
-
+    savePlainTextEditToFile(ui->listWidget_TCPClientMsg);  //退出前保存日志文件
+    QCoreApplication::quit();   //触发应用退出
 }
 
 //发送消息 需要已经连接且输入非空
 void FormTcpClient::on_pushButton_TCPClientSendMsg_clicked()
 {
+    QString message= ui->plainTextEdit_TCPClientSendData->toPlainText().trimmed();  //获取空白的输入
+    if(message.isEmpty()){
+        HANDLE_ERROR(ErrorHandler::ValidationError,ErrorHandler::Warning,"发送内容不能为空",this);
+        return;
+    }
+
+    if(!connected){
+         HANDLE_ERROR(ErrorHandler::ValidationError,ErrorHandler::Warning,"未连接服务器,无法发送",this);
+        return;
+    }
+    NetworkClient.ClientSendMsgToServer(message);                // 发送消息
+
+    QString timestamp = QDateTime::currentDateTime().toString("yyyy/MM/dd hh:mm:ss"); // 时间戳
+    QString logEntry = QString("\n[%1]\n客户端发送: %2").arg(timestamp, message);     // 发送日志
+    ui->listWidget_TCPClientMsg->appendPlainText(logEntry);                   // 追加日志（自动滚动到底部）
+
+    if (!NetworkClient.strTempData.isEmpty()) {                  // 如果底层有附加日志，继续追加
+        ui->listWidget_TCPClientMsg->appendPlainText(NetworkClient.strTempData);
+    }
+
+    trimLog();                                                   // 裁剪日志
 
 }
 
+
+
+// 自动测试开关：勾选则启用定时发送，取消则恢复手动
 void FormTcpClient::on_checkBox_TCPClientAutoTesting_clicked()
 {
 
