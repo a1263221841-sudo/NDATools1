@@ -43,7 +43,7 @@ template <> constexpr inline auto Network::qt_create_metaobjectdata<qt_meta_tag_
         "",
         "connectionFailed",
         "errorString",
-        "dataReveived",
+        "dataReceived",
         "data",
         "ClientDisconnectionedFunc",
         "DisconnectFromHost",
@@ -65,7 +65,7 @@ template <> constexpr inline auto Network::qt_create_metaobjectdata<qt_meta_tag_
         QtMocHelpers::SignalData<void(const QString &)>(3, 2, QMC::AccessPublic, QMetaType::Void, {{
             { QMetaType::QString, 4 },
         }}),
-        // Signal 'dataReveived'
+        // Signal 'dataReceived'
         QtMocHelpers::SignalData<void(const QString &)>(5, 2, QMC::AccessPublic, QMetaType::Void, {{
             { QMetaType::QString, 6 },
         }}),
@@ -114,7 +114,7 @@ void Network::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, voi
         switch (_id) {
         case 0: _t->connectionEstablished(); break;
         case 1: _t->connectionFailed((*reinterpret_cast<std::add_pointer_t<QString>>(_a[1]))); break;
-        case 2: _t->dataReveived((*reinterpret_cast<std::add_pointer_t<QString>>(_a[1]))); break;
+        case 2: _t->dataReceived((*reinterpret_cast<std::add_pointer_t<QString>>(_a[1]))); break;
         case 3: _t->ClientDisconnectionedFunc(); break;
         case 4: _t->DisconnectFromHost(); break;
         case 5: _t->ReadServerMsg(); break;
@@ -143,7 +143,7 @@ void Network::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, voi
             return;
         if (QtMocHelpers::indexOfMethod<void (Network::*)(const QString & )>(_a, &Network::connectionFailed, 1))
             return;
-        if (QtMocHelpers::indexOfMethod<void (Network::*)(const QString & )>(_a, &Network::dataReveived, 2))
+        if (QtMocHelpers::indexOfMethod<void (Network::*)(const QString & )>(_a, &Network::dataReceived, 2))
             return;
     }
 }
@@ -192,7 +192,7 @@ void Network::connectionFailed(const QString & _t1)
 }
 
 // SIGNAL 2
-void Network::dataReveived(const QString & _t1)
+void Network::dataReceived(const QString & _t1)
 {
     QMetaObject::activate<void>(this, &staticMetaObject, 2, nullptr, _t1);
 }
