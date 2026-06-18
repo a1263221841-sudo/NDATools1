@@ -21,17 +21,17 @@ FormTcpServer::FormTcpServer(QWidget *parent)
     //枚举本机iPV4 ,填充下拉框
     QList<QHostAddress> addList = QNetworkInterface::allAddresses();
     QStringList ipList;
-    ipList.reserve(addrList.size());//顶分配空间
+    ipList.reserve(addList.size());//顶分配空间
 
-    for(const QHostAddress &address : addrList){
+    for(const QHostAddress &address : addList){
         if(address.protocol() == QAbstractSocket::IPv4Protocol){
             ipList.append(address.toString());
         }
     }
 
     //批量添加ui地址,减少ui更新次数
-    ui->comboBox_TCPServerIp-setUpdatesEnabled(false);
-    ui->comboBox_TCPServerIp->addItem(ipList);
+    ui->comboBox_TCPServerIp->setUpdatesEnabled(false);
+    ui->comboBox_TCPServerIp->addItems(ipList);
     ui->comboBox_TCPServerIp->setUpdatesEnabled(true);
 
 
@@ -184,7 +184,7 @@ FormTcpServer::~FormTcpServer()
     }catch(const std::exception& e){
         qWarning()<< "FormTcpServer析构时发生异常:"<<e.what();  //捕获标准异常
     }catch(...){
-        qWarning()<<"FormTcpServer析构时发生未知异常"<<  //捕获未知异常
+        qWarning()<<"FormTcpServer析构时发生未知异常";  //捕获未知异常
     }
     qDebug()<<"FormTcpServer析构函数完成"; //记录析构结束
 }
@@ -192,7 +192,7 @@ FormTcpServer::~FormTcpServer()
 
 //功能:启动监听 校验ip/端口并持久化配置
 //防止重复启动 .基础合法性校验后调用listen 成功则记忆,配置并更新按扭状态
-void FormTcpServer::on_pushButton_TCPServerStart_clicked()
+void FormTcpServer::on_pushButton_TCPServerStartListen_clicked()
 {
     QString ipText= ui->comboBox_TCPServerIp->currentText(); //读取选中ip
     QHostAddress address(ipText);
@@ -235,7 +235,7 @@ void FormTcpServer::on_pushButton_TCPServerStart_clicked()
 
 //停止监听,并断开所有的客户端
 //关闭服务器监听,断开并清空所有socket,复位按扭状态
-void FormTcpServer::on_pushButton_TCPServerStop_clicked()
+void FormTcpServer::on_pushButton_TCPServerCloseListen_clicked()
 {
     if(!serverRunning){
         appendColorLog("[Server not running",QColor("#666666")); //提示
@@ -275,7 +275,7 @@ void FormTcpServer::on_pushButton_TCPServerStop_clicked()
 }
 
 //关闭窗口,保存日志并退出
-void FormTcpServer::on_pushButton_TCPServerClose_clicked()
+void FormTcpServer::on_pushButton_TCPServerQuit_clicked()
 {
     saveListWidgetToFile(ui->listWidget_TCPServerMsg);  //退出前保存日志到文件
 
@@ -362,7 +362,7 @@ void FormTcpServer::trimLog(int keepRows, int trimStep)
     const int step =trimStep >0 ? trimStep :kTrimDefault;
 
     int count = ui->listWidget_TCPServerMsg->count();  //当前行数
-    if(count <= targerKeep +step)
+    if(count <= targetKeep +step)
         return;
     int removeCount = count - targetKeep;
 
@@ -393,43 +393,177 @@ void FormTcpServer::trimLog(int keepRows, int trimStep)
 //检验ip字符串是否合法
 bool FormTcpServer::CheckIPAddressValid(QString strIpAddress)
 {
-
+    QHostAddress addr;  //临时地址对象
+    return addr.setAddress(strIpAddress)  && addr.protocol() == QAbstractSocket::IPv4Protocol;  //仅接受iPV4
 }
 
 //将列表控件内部保存到文件(追加或覆盖由实现决定)
+//参数:ListWidget 日志列表指针
 void FormTcpServer::saveListWidgetToFile(QListWidget* listwidget)
 {
+    if(!listwidget){
+        qWarning() <<"FormTcpServer::saveListWidgetToFile: listWidget is null";
+        return;
+    }
 
+    //获取配置文件所在目录(与QSettings配置文件同一目录)
+    //使用AppDataLocation的父目录,确保与iNI文件子同一目录 : %APPDATA%\NDATools
+    QString appDataPath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+    QDir appDataDir(appDataPath);
+    //如果路径以应用名称结尾,则使用父目录
+    QString appName = QApplication::applicationName();
+    if(!appName.isEmpty() && (appDataPath.endsWith("/" + appName) || appDataPath.endsWith("\\" +appName))){
+        QDir parentDir =appDataDir;
+        if(parentDir.cdUp()){
+            appDataPath= parentDir.absolutePath();
+        }
+    }
+     QDir().mkpath(appDataPath);   //确保目录存在
+
+     //使用固定文件名,追加模式
+     QString fileName = QDir(appDataPath).filePath("TCPServerLogfile.txt");
+
+     //检查文件是否存在,决定,是追加还是创建
+     bool fileExists = QFile::exists(fileName);
+     QIODevice::OpenMode openMode =fileExists ? (QIODevice::Append | QIODevice::Text) :(QIODevice::WriteOnly | QIODevice::Text);
+
+     QFile file(fileName);
+     if(file.open(openMode)){
+         QTextStream out(&file);
+#if QT_VERSION < QT_VERSION_CHECK(6,0,0)
+         out.setCodec("UTF-8");  //qt5 设置编码
+#else
+out.setEncoding(QStringConverter::Utf8);  //QT6设置编码
+#endif
+
+    //如果是追加模式,先写入分隔符和时间戳
+         if(fileExists){
+             QString timestamp =QDateTime::currentDateTime().toString("yyy-MM-dd hh:mm:ss");
+#if QT_VERSION < QT_VERSION_CHECK(6,0,0)
+             out << "\n" << "========== " << timestamp << " ==========" << endl;
+#else
+             out<< "\n" << "========" <<timestamp<<"========="  <<Qt::endl;
+#endif
+         }
+
+
+         //性能优化:批量写入,减少I/O操作
+         //先收集所有文本,然后一次性写入
+         QStringList allItems;
+         allItems.reserve(listwidget->count());   //预分配空间
+
+         for(int i =0;i <listwidget->count(); ++i){
+             QListWidgetItem *item = listwidget->item(i);  //获取第i项
+             if(item){
+                 allItems.append(item->text());
+             }
+         }
+
+        //一次性写入所有内容
+         out<<allItems.join('\n');
+#if QT_VERSION <QT_VERSION_CHECK(6,0,0)
+                     out <<endl;
+#else
+         out << Qt::endl;
+#endif
+         file.close();
+         qDebug()<< "TCP服务器日志已保存至:"<<fileName;
+         //注意:窗口关闭时不显示消息框,避免阻塞
+         if(this->isVisible()){
+             QMessageBox::information(this,"成功",QString("日志已保存至 %1").arg(fileName));
+         }
+     }else{
+         qWarning() << "TCP服务器日志保存失败:" <<file.errorString();
+         if(this->isVisible()){
+             QMessageBox::critical(this,"错误","保存失败:" +file.errorString());
+         }
+     }
 }
 
-//保存日志
+//保存日志,追加模式(public 接口,供主窗口调用)
 void FormTcpServer::saveLog()
 {
-
+    if(ui && ui->listWidget_TCPServerMsg){
+        saveListWidgetToFile(ui->listWidget_TCPServerMsg);
+    }
 }
 
 
 //窗口关闭事件,保存日志,清理资源
 void FormTcpServer::closeEvent(QCloseEvent *event)
 {
-
+    saveLog();
+    event->accept();
 }
 
 
-//处理新客户链接,记录并更新列表
+//处理新客户链接,记录并更新列表  保存socket并锁定readyread/disconnected
 void FormTcpServer::TcpServerConnectedFunc()
 {
+    tcpServerSocket = tcpServer->nextPendingConnection(); //获取最新待处理连接
+    if(!tcpServerSocketList.contains(tcpServerSocket))   //若列表未包含
+   tcpServerSocketList.append(tcpServerSocket);
 
+    connect(tcpServerSocket,&QTcpSocket::readyRead,this,&FormTcpServer::ReadAllDataFunc);  //数据可读
+    connect(tcpServerSocket,&QTcpSocket::disconnected,this,&FormTcpServer::ClientDisconnectedFunc);
+
+    QString strPort=QString::number((tcpServerSocket->peerPort()));  //获取对端端口(暂未使用)
+    appendColorLog("\n[Prompt:New client connection.]\n",QColor("#666666"));  //记录连接
+
+    receivedMessageCount = 0;
 }
 
 //功能:处理客户端断开,清理列表与ui状态
-void FormTcpServer::CientDisconnectedFunc()
+void FormTcpServer::ClientDisconnectedFunc()
 {
+    QTcpSocket *client =qobject_cast<QTcpSocket*>(sender());  //获取断开方
+    if(client){
+        tcpServerSocketList.removeOne(client);   //从列表移除
+        client->deleteLater();      //异步删除
+    }
 
+    QString msg = QString("\n[Prompt:Client disconnected.");
+    appendColorLog(msg,QColor("$666666"));
 }
 
 //功能:读取所有可用数据并计数,展示日志
 void FormTcpServer::ReadAllDataFunc()
 {
+    if(QTcpSocket *client =qobject_cast<QTcpSocket*>(sender())){   //获取触发的客户端
+        //检查客户端是否仍然连接
+        if(client->state() != QAbstractSocket::ConnectedState){
+            qWarning() <<"Client is not connected,skip reading data";
+            return;
+        }
 
+        QByteArray data =client->readAll();   //读取全部可用数据
+        if(data.isEmpty())   {              //检查数据是否为空
+            return;
+        }
+
+        QString message = QString::fromUtf8(data);    //按utf-8转字符串
+
+//性能优化:使用QStringBuilder或直接拼接,避免多次arg调用
+        QString timestamp = QDateTime::currentDateTime().toString("yyyy/MM/dd  hh:mm:ss");  //记录时间
+        QString logEntry = QString("\n[%1] Reveived: %2\n").arg(timestamp,message);
+        appendColorLog(logEntry,QColor("#0078D4"));
+
+
+        QString response ="Server response: "   +message;  //简单回显
+//再次检查连接状态,确保可以发送
+        if(client->state() ==QAbstractSocket::ConnectedState)
+        {
+            qint64 bytesWritten =client->write(response.toUtf8());  //发送回客户端
+            if(bytesWritten == -1){
+                qWarning() <<"Failed to send response to client:"<< client->errorString();
+            }
+        }else{
+            qWarning() <<"Client disconnected before sending response";
+        }
+    }
 }
+
+
+
+
+

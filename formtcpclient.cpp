@@ -128,6 +128,7 @@ FormTcpClient::FormTcpClient(QWidget *parent)
         ui->pushButton_TCPClientSendMsg->setEnabled(true);
         ui->listWidget_TCPClientMsg->setEnabled(true);
         ui->checkBox_TCPClientAutoText->setEnabled(true);
+        ui->plainTextEdit_TCPClientSendData->setEnabled(true);
         connected= true;   //标记已连接
 
         QString strTemp = QString("[%1]  连接服务器成功")   //生成成功日志

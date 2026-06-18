@@ -189,20 +189,14 @@
    <property name="title">
     <string>UDP协议客户端消息列表</string>
    </property>
-   <widget class="QListWidget" name="listWidget_UDPClientMsg">
+   <widget class="QPlainTextEdit" name="plainTextEdit_UDPClientMsgList">
     <property name="geometry">
      <rect>
-      <x>10</x>
-      <y>20</y>
-      <width>591</width>
-      <height>511</height>
+      <x>13</x>
+      <y>24</y>
+      <width>581</width>
+      <height>501</height>
      </rect>
-    </property>
-    <property name="font">
-     <font>
-      <family>仿宋</family>
-      <pointsize>11</pointsize>
-     </font>
     </property>
    </widget>
   </widget>
