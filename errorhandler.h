@@ -96,7 +96,7 @@ signals:
 
 //定义宏,统一日志格式,和默认的等级
 #define LOG_ERROR(context,message) \
-ErrorHandler::instance().logError(context,message,ErrorHandler::Crtical);  //记录严重错误
+ErrorHandler::instance().logError(context,message,ErrorHandler::Critical);  //记录严重错误
 
 #define LOG_WARNING(context,message) \
 ErrorHandler::instance().logError(context,message,ErrorHandler::Warning);  //记录警告

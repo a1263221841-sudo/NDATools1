@@ -128,6 +128,7 @@ FormTcpClient::FormTcpClient(QWidget *parent)
         ui->pushButton_TCPClientSendMsg->setEnabled(true);
         ui->listWidget_TCPClientMsg->setEnabled(true);
         ui->checkBox_TCPClientAutoText->setEnabled(true);
+        ui->plainTextEdit_TCPClientSendData->setEnabled(true);
         connected= true;   //标记已连接
 
         QString strTemp = QString("[%1]  连接服务器成功")   //生成成功日志
@@ -156,8 +157,8 @@ FormTcpClient::FormTcpClient(QWidget *parent)
             QString strTemp = QString("\n[%1] 接收: %2")               // 拼接时间戳与内容
                                   .arg(QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss"))
                                   .arg(data);
-            ui->listWidget_TCPClientMsg->appendPlainText(strTemp); // 追加日志（自动滚动到底部）
-
+            ui->listWidget_TCPClientMsg->addItem(strTemp); // 追加日志（自动滚动到底部）
+            ui->listWidget_TCPClientMsg->scrollToBottom();
             trimLog();                                                 // 裁剪日志
 
 
@@ -224,9 +225,10 @@ void FormTcpClient::on_pushButton_TCPClientConnect_clicked()
                               .arg(QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss"))
                               .arg(ipAddress)
                               .arg(port);
-        ui->listWidget_TCPClientMsg->appendPlainText(strTemp) ;//appendPlainText会自动滚到底部
+        ui->listWidget_TCPClientMsg->addItem(strTemp) ;//appendPlainText会自动滚到底部
+        ui->listWidget_TCPClientMsg->scrollToBottom();
     }catch(const std::exception &e){    //捕获标准异常
-        LOG_ERROR("TCP客户端",QStirng("连接时发生异常: %1").arg(e.what()));
+        LOG_ERROR("TCP客户端",QString("连接时发生异常: %1").arg(e.what()));
         HANDLE_ERROR(ErrorHandler::UnknownError, ErrorHandler::Critical,QString("连接时发生异常:%1").arg(e.what()),this);
 
         ui->pushButton_TCPClientConnect->setEnabled(true);
@@ -260,7 +262,26 @@ void FormTcpClient::on_pushButton_TCPClientDisconnect_clicked()
 //关闭窗口
 void FormTcpClient::on_pushButton_TCPClientClose_clicked()
 {
-    savePlainTextEditToFile(ui->listWidget_TCPClientMsg);  //退出前保存日志文件
+    //savePlainTextEditToFile(ui->listWidget_TCPClientMsg);  //退出前保存日志文件
+    // 获取 AppData 路径
+    QString appDataPath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+    QDir appDir(appDataPath);
+    if (!appDir.exists())
+        appDir.mkpath(".");
+
+    // 构建日志文件路径（例如按时间命名）
+    QString fileName = appDataPath + "/log_" + QDateTime::currentDateTime().toString("yyyyMMdd_hhmmss") + ".txt";
+    QFile file(fileName);
+    if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        QTextStream out(&file);
+        // 遍历 QListWidget 的所有条目
+        for (int i = 0; i < ui->listWidget_TCPClientMsg->count(); ++i) {
+            QListWidgetItem *item = ui->listWidget_TCPClientMsg->item(i);
+            if (item)
+                out << item->text() << "\n";
+        }
+        file.close();
+    }
     QCoreApplication::quit();   //触发应用退出
 }
 
@@ -281,10 +302,11 @@ void FormTcpClient::on_pushButton_TCPClientSendMsg_clicked()
 
     QString timestamp = QDateTime::currentDateTime().toString("yyyy/MM/dd hh:mm:ss"); // 时间戳
     QString logEntry = QString("\n[%1]\n客户端发送: %2").arg(timestamp, message);     // 发送日志
-    ui->listWidget_TCPClientMsg->appendPlainText(logEntry);                   // 追加日志（自动滚动到底部）
-
+    ui->listWidget_TCPClientMsg->addItem(logEntry);                   // 追加日志（自动滚动到底部）
+    ui->listWidget_TCPClientMsg->scrollToBottom();
     if (!NetworkClient.strTempData.isEmpty()) {                  // 如果底层有附加日志，继续追加
-        ui->listWidget_TCPClientMsg->appendPlainText(NetworkClient.strTempData);
+        ui->listWidget_TCPClientMsg->addItem(NetworkClient.strTempData);
+        ui->listWidget_TCPClientMsg->scrollToBottom();
     }
 
     trimLog();                                                   // 裁剪日志
@@ -296,21 +318,171 @@ void FormTcpClient::on_pushButton_TCPClientSendMsg_clicked()
 // 自动测试开关：勾选则启用定时发送，取消则恢复手动
 void FormTcpClient::on_checkBox_TCPClientAutoTesting_clicked()
 {
+    bool isAutoTesting = ui->checkBox_TCPClientAutoText->isChecked();  //读取复选框状态
+
+    if(isAutoTesting){   //开启自动测试
+        if(!connected){
+            HANDLE_ERROR(ErrorHandler::NetworkError,ErrorHandler::Warning,"未连接服务器,无法开始自动测试",this);
+            ui->checkBox_TCPClientAutoText->setChecked(false);  //回退勾选
+            return;
+        }
+
+        //从消息控件里面获取文本信息
+        QString message = ui->plainTextEdit_TCPClientSendData->toPlainText().trimmed();
+        if(message.isEmpty()){
+            HANDLE_ERROR(ErrorHandler::ValidationError, ErrorHandler::Warning, "发送内容不能为空，无法开始自动测试！", this);
+            ui->checkBox_TCPClientAutoText->setChecked(false); // 回退勾选
+            return;
+        }
+
+        //设置自动发送测试消息内容
+        NetworkClient.setAutoTestMessage(message);   //启动自动发送定时器
+        NetworkClient.StartTimerOutFunc();
+        ui->plainTextEdit_TCPClientSendData->setEnabled(false);  //禁用手动输入
+        ui->pushButton_TCPClientSendMsg->setEnabled(false);
+    }else{
+        NetworkClient.StopTimerOutFunc();  //停止计时器
+        enableCommunicationContorols(true); //重新启用手动交互
+    }
+}
+//日志裁剪,保留行数/超限删除步长
+void FormTcpClient::trimLog(int keepBlocks,int trimStep)
+{
+    static const int kKeepDefault = 1000;  //默认保留block数
+    static const int kTrimDefault = 200;    //默认删除步长
+    const int keep =keepBlocks >0 ? keepBlocks :kKeepDefault;  //实际保留数
+    const int step = trimStep >0 ? trimStep :kTrimDefault;  //实际步长
+    auto doc = ui->plainTextEdit_TCPClientSendData->document();
+    int blocks = doc->blockCount();  //当前的额block数
+    if(blocks <= keep + step) return ;
+    int removeBlocks = blocks -keep;   //需删除的block数
+    QTextCursor cursor(doc);  //创建光标
+    cursor.movePosition(QTextCursor::Start);  //移到开头
+    for(int i=0; i<removeBlocks; i++){
+        cursor.movePosition(QTextCursor::NextBlock ,QTextCursor::KeepAnchor);
+    }
+    cursor.removeSelectedText();  //删除选中文本
+    cursor.deleteChar();  //删除残留换行
+}
+
+//IP合法性校验(保留旧接口)
+bool FormTcpClient::CheckIPAddrIsValid(QString strIpAddress)
+{
+    QRegularExpression ipRegex("^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$"); // IPv4 正则
+    return ipRegex.match(strIpAddress).hasMatch();              // 匹配成功则合法
 
 }
 
-void trimLog(int keepBlocks = 1000,int trimStep = 200);  //日志裁剪,保留行数/超限删除步长
-bool CheckIPAddrIsValid(QString strIpAddress);  //IP合法性校验(保留旧接口)
-void enableCommunicationContorols(bool enable);  //批量控制与连接相关的UI
-void closeEvent(QCloseEvent *event) override;  //窗口关闭事件,保存日志并接受关闭
+//批量控制与连接相关的UI
+void FormTcpClient::enableCommunicationContorols(bool enable)
+{
+    ui->pushButton_TCPClientConnect->setEnabled(!enable);       // 启用通信时禁用“连接”
+    ui->pushButton_TCPClientDisconnect->setEnabled(enable);     // 启用/禁用“断开”
+    ui->pushButton_TCPClientSendMsg->setEnabled(enable);        // 启用/禁用“发送”
+    ui->checkBox_TCPClientAutoText->setEnabled(enable);      // 启用/禁用自动测试
+    ui->plainTextEdit_TCPClientSendData->setEnabled(enable);    // 启用/禁用输入框
+
+}
+
+
+//窗口关闭事件,保存日志并接受关闭
+void FormTcpClient::closeEvent(QCloseEvent *event)
+{
+    // 如果已连接，先断开连接
+    if (connected) {
+        NetworkClient.DisconnectFromHost();
+        connected = false;
+    }
+
+    saveLog();
+    event->accept();
+
+}
 
 //保存日志文本到文件
-void FormTcpClient::savePlainTextEditToFile(QPlainTextEdit* plianTextEdit)
+void FormTcpClient::saveListWidgetToFile(QListWidget* listWidget)
 {
+    if(!listWidget){
+        qWarning() <<"FormTcpClient::savePlainTextToFile: listWidget is null";
+        return;
+    }
+
+    //获取配置文件所在目录（与QSettings配置文件同一目录）
+    //使用AppDataLocation的父目录,确保与ini文件在同一目录,%APPDATA%\NDATools
+    QString appDataPath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+    QDir appDataDir(appDataPath);
+    //如果路径以应用名换成呢归结为,
+    QString appName = QApplication::applicationName();
+    if (!appName.isEmpty() && (appDataPath.endsWith("/" + appName) ||
+                               appDataPath.endsWith("\\" + appName))) {
+        QDir parentDir = appDataDir;
+        if (parentDir.cdUp()) {
+            appDataPath = parentDir.absolutePath();
+        }
+    }
+    QDir().mkpath(appDataPath); // 确保目录存在
+
+    // 使用固定文件名，追加模式
+    QString fileName = QDir(appDataPath).filePath("TCPClientLogfile.txt");
+
+    // 检查文件是否存在，决定是追加还是创建
+    bool fileExists = QFile::exists(fileName);
+    QIODevice::OpenMode openMode = fileExists ?
+                                       (QIODevice::Append | QIODevice::Text) :
+                                       (QIODevice::WriteOnly | QIODevice::Text);
+
+    QFile file(fileName);
+    if (file.open(openMode)) {
+        QTextStream out(&file);
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+        out.setCodec("UTF-8"); // Qt5设置编码
+#else
+        out.setEncoding(QStringConverter::Utf8); // Qt6设置编码
+#endif
+
+        // 如果是追加模式，先写入分隔符和时间戳
+        if (fileExists) {
+            QString timestamp = QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss");
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+            out << "\n" << "========== " << timestamp << " ==========" << endl;
+#else
+            out << "\n" << "========== " << timestamp << " ==========" << Qt::endl;
+#endif
+        }
+
+        // 【关键修改点：遍历 QListWidget 提取所有文本行】
+        for (int i = 0; i < listWidget->count(); ++i) {
+            QListWidgetItem *item = listWidget->item(i);
+            if (item) {
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+                out << item->text() << endl;
+#else
+                out << item->text() << Qt::endl;
+#endif
+            }
+        }
+        file.close();
+        qDebug() << "TCP客户端日志已保存至:" << fileName;
+        // 注意：窗口关闭时不显示消息框，避免阻塞
+        if (this->isVisible()) {
+            QMessageBox::information(this, "成功", QString("日志已保存至 %1").arg(fileName));
+        }
+    } else {
+        qWarning() << "TCP客户端日志保存失败:" << file.errorString();
+        if (this->isVisible()) {
+            QMessageBox::critical(this, "错误", "保存失败: " + file.errorString());
+        }
+    }
+
 
 }
 //保存日志
 void FormTcpClient::saveLog()
 {
-
+    if(ui &&ui->listWidget_TCPClientMsg){
+      saveListWidgetToFile(ui->listWidget_TCPClientMsg);
+    }
 }
+
+
+

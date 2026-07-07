@@ -17,6 +17,7 @@
 #include <QFile>
 #include <QTextStream>
 #include <QCloseEvent>
+#include <QListWidget>
 
 #include <QStandardPaths>  //获取配置文件目录
 #include <QDir>   //目录操作
@@ -67,7 +68,7 @@ private:
 
 public:
     //保存日志文本到文件
-    void savePlainTextEditToFile(QPlainTextEdit* plianTextEdit);
+    void saveListWidgetToFile(QListWidget* listWidget);
      //保存日志
     void saveLog();
 };

@@ -7,6 +7,7 @@
 *****************************************************************************/
 
 #include "../../../formtcpserver.h"
+#include <QtGui/qtextcursor.h>
 #include <QtCore/qmetatype.h>
 
 #include <QtCore/qtmochelpers.h>
@@ -38,10 +39,32 @@ template <> constexpr inline auto FormTcpServer::qt_create_metaobjectdata<qt_met
 {
     namespace QMC = QtMocConstants;
     QtMocHelpers::StringRefStorage qt_stringData {
-        "FormTcpServer"
+        "FormTcpServer",
+        "on_pushButton_TCPServerStartListen_clicked",
+        "",
+        "on_pushButton_TCPServerCloseListen_clicked",
+        "on_pushButton_TCPServerQuit_clicked",
+        "on_pushButton_TCPServerSendMsg_clicked",
+        "TcpServerConnectedFunc",
+        "ClientDisconnectedFunc",
+        "ReadAllDataFunc"
     };
 
     QtMocHelpers::UintData qt_methods {
+        // Slot 'on_pushButton_TCPServerStartListen_clicked'
+        QtMocHelpers::SlotData<void()>(1, 2, QMC::AccessPrivate, QMetaType::Void),
+        // Slot 'on_pushButton_TCPServerCloseListen_clicked'
+        QtMocHelpers::SlotData<void()>(3, 2, QMC::AccessPrivate, QMetaType::Void),
+        // Slot 'on_pushButton_TCPServerQuit_clicked'
+        QtMocHelpers::SlotData<void()>(4, 2, QMC::AccessPrivate, QMetaType::Void),
+        // Slot 'on_pushButton_TCPServerSendMsg_clicked'
+        QtMocHelpers::SlotData<void()>(5, 2, QMC::AccessPrivate, QMetaType::Void),
+        // Slot 'TcpServerConnectedFunc'
+        QtMocHelpers::SlotData<void()>(6, 2, QMC::AccessPublic, QMetaType::Void),
+        // Slot 'ClientDisconnectedFunc'
+        QtMocHelpers::SlotData<void()>(7, 2, QMC::AccessPublic, QMetaType::Void),
+        // Slot 'ReadAllDataFunc'
+        QtMocHelpers::SlotData<void()>(8, 2, QMC::AccessPublic, QMetaType::Void),
     };
     QtMocHelpers::UintData qt_properties {
     };
@@ -63,9 +86,18 @@ Q_CONSTINIT const QMetaObject FormTcpServer::staticMetaObject = { {
 void FormTcpServer::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
 {
     auto *_t = static_cast<FormTcpServer *>(_o);
-    (void)_t;
-    (void)_c;
-    (void)_id;
+    if (_c == QMetaObject::InvokeMetaMethod) {
+        switch (_id) {
+        case 0: _t->on_pushButton_TCPServerStartListen_clicked(); break;
+        case 1: _t->on_pushButton_TCPServerCloseListen_clicked(); break;
+        case 2: _t->on_pushButton_TCPServerQuit_clicked(); break;
+        case 3: _t->on_pushButton_TCPServerSendMsg_clicked(); break;
+        case 4: _t->TcpServerConnectedFunc(); break;
+        case 5: _t->ClientDisconnectedFunc(); break;
+        case 6: _t->ReadAllDataFunc(); break;
+        default: ;
+        }
+    }
     (void)_a;
 }
 
@@ -85,6 +117,18 @@ void *FormTcpServer::qt_metacast(const char *_clname)
 int FormTcpServer::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
 {
     _id = QWidget::qt_metacall(_c, _id, _a);
+    if (_id < 0)
+        return _id;
+    if (_c == QMetaObject::InvokeMetaMethod) {
+        if (_id < 7)
+            qt_static_metacall(this, _c, _id, _a);
+        _id -= 7;
+    }
+    if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
+        if (_id < 7)
+            *reinterpret_cast<QMetaType *>(_a[0]) = QMetaType();
+        _id -= 7;
+    }
     return _id;
 }
 QT_WARNING_POP
