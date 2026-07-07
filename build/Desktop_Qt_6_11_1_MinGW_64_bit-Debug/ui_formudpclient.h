@@ -15,7 +15,6 @@
 #include <QtWidgets/QComboBox>
 #include <QtWidgets/QGroupBox>
 #include <QtWidgets/QLabel>
-#include <QtWidgets/QListWidget>
 #include <QtWidgets/QPlainTextEdit>
 #include <QtWidgets/QPushButton>
 #include <QtWidgets/QSpinBox>
@@ -35,7 +34,7 @@ public:
     QSpinBox *spinBox_UDPClientPort;
     QComboBox *comboBox_UDPClientIp;
     QGroupBox *groupBox;
-    QListWidget *listWidget_UDPClientMsg;
+    QPlainTextEdit *plainTextEdit_UDPClientMsgList;
 
     void setupUi(QWidget *FormUDPClient)
     {
@@ -87,10 +86,9 @@ public:
         groupBox->setObjectName("groupBox");
         groupBox->setGeometry(QRect(10, 10, 611, 541));
         groupBox->setFont(font);
-        listWidget_UDPClientMsg = new QListWidget(groupBox);
-        listWidget_UDPClientMsg->setObjectName("listWidget_UDPClientMsg");
-        listWidget_UDPClientMsg->setGeometry(QRect(10, 20, 591, 511));
-        listWidget_UDPClientMsg->setFont(font);
+        plainTextEdit_UDPClientMsgList = new QPlainTextEdit(groupBox);
+        plainTextEdit_UDPClientMsgList->setObjectName("plainTextEdit_UDPClientMsgList");
+        plainTextEdit_UDPClientMsgList->setGeometry(QRect(13, 24, 581, 501));
 
         retranslateUi(FormUDPClient);
 

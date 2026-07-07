@@ -57,7 +57,7 @@ public:
     void saveLog();
 
     //udp客户端套接字指针,初始化为nullptr
-    QUdpSocket *UDPClientSocket=nullpt;
+    QUdpSocket *UDPClientSocket=nullptr;
 
     //发送目标地址缓存,可选用途
     QHostAddress UDPClientHostAddress;

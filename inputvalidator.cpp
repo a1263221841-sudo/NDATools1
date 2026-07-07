@@ -162,15 +162,15 @@ InputValidator::ValidationResult InputValidator::validatorFilePath(const QString
 }
 
 //非空字符串校验函数:验证字符串不为空且不仅包含空白字符串
-InputValidator::ValidationResult InputValidator::validatorNonEmptyString(const QString &str,const QString &fieldName )
+InputValidator::ValidationResult InputValidator::validatorNonEmptyString(const QString &str,const QString &filedName )
 {
     //第一层检查:判断输入字符串是否为空(长度为0)
     if(str.isEmpty()){
-        return ValidationResult(false,QString("%1不能为空").arg(fieldName));
+        return ValidationResult(false,QString("%1不能为空").arg(filedName));
     }
     //第二层检查:判断去掉收尾空白字符后是否为空(防止仅输入空格,制表符)
     if(str.trimmed().isEmpty()){
-        return ValidationResult(false,QString("%1不能只包含空白字符").arg(fieldName));
+        return ValidationResult(false,QString("%1不能只包含空白字符").arg(filedName));
     }
     return ValidationResult(true);
 }
