@@ -37,7 +37,7 @@ FormUDPClient::FormUDPClient(QWidget *parent)
 
 
     //设置整体界面样式,背景色,分组框边框与标题,标签,编辑框,按扭
-    setStyle(
+    setStyleSheet(
         "QWidget {"
         "  background-color: #F3F4F6;"
         "  color: #1F2933;"
@@ -95,7 +95,7 @@ FormUDPClient::FormUDPClient(QWidget *parent)
         );
 
     //设置发送按扭上图标的显示尺寸
-    ui->pushButton_TCPClientSendMsg->setIconSize(QSize(16,16));
+    ui->pushButton_UDPClientSendMsg->setIconSize(QSize(16,16));
 
     //DPI设置已在main.cpp中统一配置,此处不再重复设置
     //从QSettings恢复上次使用的ip和端口,便于用户连续使用同一目标
@@ -105,11 +105,11 @@ FormUDPClient::FormUDPClient(QWidget *parent)
         const int lastPort = settings.value("UDPClient/lastPort",ui->spinBox_UDPClientPort->value()).toInt();
 
         //若下拉框控件中已有该IP则选中对应项,否则也可以编辑方式输入lastip
-        int index=ui->comboBox_UDPClientIp->focusInEvent(lastIp);
+        int index=ui->comboBox_UDPClientIp->findText(lastIp);
         if(index>=0){
             ui->comboBox_UDPClientIp->setCurrentIndex(index);
         }   else{
-            ui->comboBox_UDPClientIp->setEditable(lastIp);
+            ui->comboBox_UDPClientIp->setEditText(lastIp);
         }
 
         //端口在控件范围内时才写入,避免非法值

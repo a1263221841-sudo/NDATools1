@@ -27,7 +27,7 @@ class Ui_FormUDPClient
 public:
     QGroupBox *groupBox_3;
     QPlainTextEdit *plainTextEdit_UDPClientSendData;
-    QPushButton *pushButton_TCPClientSendMsg;
+    QPushButton *pushButton_UDPClientSendMsg;
     QGroupBox *groupBox_2;
     QLabel *label;
     QLabel *label_2;
@@ -52,13 +52,13 @@ public:
         plainTextEdit_UDPClientSendData->setObjectName("plainTextEdit_UDPClientSendData");
         plainTextEdit_UDPClientSendData->setGeometry(QRect(10, 20, 191, 281));
         plainTextEdit_UDPClientSendData->setFont(font);
-        pushButton_TCPClientSendMsg = new QPushButton(groupBox_3);
-        pushButton_TCPClientSendMsg->setObjectName("pushButton_TCPClientSendMsg");
-        pushButton_TCPClientSendMsg->setGeometry(QRect(10, 310, 191, 31));
-        pushButton_TCPClientSendMsg->setFont(font);
+        pushButton_UDPClientSendMsg = new QPushButton(groupBox_3);
+        pushButton_UDPClientSendMsg->setObjectName("pushButton_UDPClientSendMsg");
+        pushButton_UDPClientSendMsg->setGeometry(QRect(10, 310, 191, 31));
+        pushButton_UDPClientSendMsg->setFont(font);
         QIcon icon;
         icon.addFile(QString::fromUtf8(":/new/prefix1/images/sendmsg2.ico"), QSize(), QIcon::Mode::Normal, QIcon::State::Off);
-        pushButton_TCPClientSendMsg->setIcon(icon);
+        pushButton_UDPClientSendMsg->setIcon(icon);
         groupBox_2 = new QGroupBox(FormUDPClient);
         groupBox_2->setObjectName("groupBox_2");
         groupBox_2->setGeometry(QRect(630, 10, 211, 171));
@@ -99,7 +99,7 @@ public:
     {
         FormUDPClient->setWindowTitle(QCoreApplication::translate("FormUDPClient", "Form", nullptr));
         groupBox_3->setTitle(QCoreApplication::translate("FormUDPClient", "\345\256\242\346\210\267\347\253\257\346\265\213\350\257\225\346\266\210\346\201\257", nullptr));
-        pushButton_TCPClientSendMsg->setText(QCoreApplication::translate("FormUDPClient", "\345\217\221\351\200\201\346\266\210\346\201\257", nullptr));
+        pushButton_UDPClientSendMsg->setText(QCoreApplication::translate("FormUDPClient", "\345\217\221\351\200\201\346\266\210\346\201\257", nullptr));
         groupBox_2->setTitle(QCoreApplication::translate("FormUDPClient", "\347\275\221\347\273\234\345\217\202\346\225\260\350\256\276\347\275\256", nullptr));
         label->setText(QCoreApplication::translate("FormUDPClient", "\350\277\234\347\250\213\344\270\273\346\234\272\345\234\260\345\235\200:", nullptr));
         label_2->setText(QCoreApplication::translate("FormUDPClient", "\350\277\234\347\250\213\344\270\273\346\234\272\347\253\257\345\217\243:", nullptr));

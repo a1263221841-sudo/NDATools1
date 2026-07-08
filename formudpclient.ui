@@ -47,7 +47,7 @@
      </font>
     </property>
    </widget>
-   <widget class="QPushButton" name="pushButton_TCPClientSendMsg">
+   <widget class="QPushButton" name="pushButton_UDPClientSendMsg">
     <property name="geometry">
      <rect>
       <x>10</x>
