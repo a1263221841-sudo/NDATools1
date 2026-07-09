@@ -31,7 +31,7 @@ FormUDPServer::FormUDPServer(QWidget *parent)
     ui->comboBox_UDPServerIp->setUpdatesEnabled(false);
 
     //批量添加到所有地址
-    ui->comboBox_UDPServerIp->addItem(ipList);
+    ui->comboBox_UDPServerIp->addItems(ipList);
     ui->comboBox_UDPServerIp->setUpdatesEnabled(true);
 
     //加载上次保存的配置,从QSetting读取上次的ip和端口
@@ -45,7 +45,7 @@ FormUDPServer::FormUDPServer(QWidget *parent)
         if(index>= 0){
             ui->comboBox_UDPServerIp->setCurrentIndex(index);
         }else{
-            ui->comboBox_UDPServerIp->setEditable(lastIp);
+            ui->comboBox_UDPServerIp->setEditText(lastIp);
         }
     }
 
@@ -239,7 +239,7 @@ void FormUDPServer::on_pushButton_UDPServerStart_clicked()
         }
         // 绑定IP地址和端口
         if(udpServerSocket->bind(hostAddress,port)){
-            ui->pushButton_UDPServerStart->setText("关闭监听");
+            ui->pushButton_UDPServerStartListen->setText("关闭监听");
             udpServerAppendStrItem(1,"UDP服务器启动监听成功",false);
             serverRunning=true;
 
@@ -265,7 +265,7 @@ void FormUDPServer::on_pushButton_UDPServerStart_clicked()
         }
 
         // 更新按钮文本：将按钮文本改回“启动监听”，表示当前已停止，下次点击将启动
-        ui->pushButton_UDPServerStart->setText("启动监听");
+        ui->pushButton_UDPServerStartListen->setText("启动监听");
 
         // 追加状态日志
         udpServerAppendStrItem(1,"UDP服务器已停止监听",false);
@@ -317,7 +317,7 @@ void FormUDPServer::on_pushButton_UDPServerSendMsg_clicked()
             return;
         }
 
-        QString message=ui->plainTextEdit_TCPServerSendData->toPlainText().trimmed();
+        QString message=ui->plainTextEdit_UDPServerSendData->toPlainText().trimmed();
 
         // 第五层检查：验证消息内容是否为空
         if(message.isEmpty()){
@@ -334,7 +334,7 @@ void FormUDPServer::on_pushButton_UDPServerSendMsg_clicked()
         //检查发送结果,验证数据报是否都成功发送
         if(bytes == -1)
         {
-            QMessageBox::Warning(this,"错误",QString("发送失败: %1").arg(udpServerSocket->errorString()));
+            QMessageBox::warning(this,"错误",QString("发送失败: %1").arg(udpServerSocket->errorString()));
 
             return;
         }
@@ -357,10 +357,38 @@ void FormUDPServer::on_pushButton_UDPServerSendMsg_clicked()
 void FormUDPServer::udpSeverReadPendingDatagrams()
 {
     if(!serverRunning){
-    return;
+        return;
     }
     if(!udpServerSocket){
+        qWarning()<<"FormUDPServer::udpServerReadPendingDatagrams: udpServerScoket is null";
+        return;
+    }
 
+    while(udpServerSocket->hasPendingDatagrams())
+    {
+        QByteArray datagram;
+        qint64 datagramSize =udpServerSocket->pendingDatagramSize();
+        if(datagramSize<= 0){
+            break;  //无效的数据报大小
+        }
+
+        datagram.resize(static_cast<int>(datagramSize));
+        QHostAddress clientAddress;
+        quint16 clientPort;
+
+        qint64 bytesRead=udpServerSocket->readDatagram(datagram.data(),datagram.size(),&clientAddress,&clientPort);
+
+        if(bytesRead==-1){
+            qWarning()<<"读取UDP数据报失败："<<udpServerSocket->errorString();
+            continue;
+        }
+
+        m_lastClientAddress=clientAddress;
+        m_lastClientPort=clientPort;
+
+        udpServerAppendStrItem(0,QString::formUtf8(datagram),false);
+
+        QByteArray reponse=QString("[Server reply:")
     }
 }
 
