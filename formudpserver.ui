@@ -98,7 +98,7 @@
      <string>本地主机端口:</string>
     </property>
    </widget>
-   <widget class="QSpinBox" name="spinBox_TCPServerPort">
+   <widget class="QSpinBox" name="spinBox_UDPServerPort">
     <property name="geometry">
      <rect>
       <x>20</x>
