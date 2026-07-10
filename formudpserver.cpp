@@ -386,15 +386,42 @@ void FormUDPServer::udpSeverReadPendingDatagrams()
         m_lastClientAddress=clientAddress;
         m_lastClientPort=clientPort;
 
-        udpServerAppendStrItem(0,QString::formUtf8(datagram),false);
+        udpServerAppendStrItem(0,QString::fromUtf8(datagram),false);
 
-        QByteArray reponse=QString("[Server reply:")
+        QByteArray response=QString("[Server reply:%1").arg(QString::fromUtf8(datagram)).toUtf8();
+        udpServerSocket->writeDatagram(response,clientAddress,clientPort);
     }
 }
 
 // 追加日志项到列表：将消息或状态信息追加到日志列表控件
 void FormUDPServer::udpServerAppendStrItem(int type,const QString &strData,bool clear)
 {
+    Q_UNUSED(clear);
+    QString timestamp =QDateTime::currentDateTime().toString("yyyy-mm-dd hh:mm:ss");
+    QString processedData= strData;
+    processedData.replace("\r","").replace("\n","");
+
+    QString logEntry=QString("\n[%1] %2\n%3\n")
+                           .arg(timestamp)
+                           .arg(type==0?"接收数据":"服务器状态")
+                           .arg(processedData);
+
+    ui->listWidget_UDPServerMsg->setUpdatesEnabled(false);
+    ui->listWidget_UDPServerMsg->addItem(logEntry);
+
+    trimLog();
+    ui->listWidget_UDPServerMsg->setUpdatesEnabled(true);
+
+    //自动滚动到底部,  显示最新消息(只调用一次)
+    int lastRow =ui->listWidget_UDPServerMsg->count()-1;
+    if(lastRow==0)
+    {
+        QListWidgetItem *item = ui->listWidget_UDPServerMsg->item(lastRow);
+        if(item){
+            ui->listWidget_UDPServerMsg->scrollToItem(item,QAbstractItemView::PositionAtBottom);
+            ui->listWidget_UDPServerMsg->setCurrentRow(lastRow);
+        }
+    }
 
 }
 
@@ -402,13 +429,51 @@ void FormUDPServer::udpServerAppendStrItem(int type,const QString &strData,bool 
 // 日志裁剪函数：当日志列表项数超过阈值时，删除前部项以控制内存使用
 void FormUDPServer::trimLog(int keepRows,int trimStep)
 {
+    static const int  kKeepDefault = 1000;
+    static const int  kTrimDefault = 200;
 
+    const int targetKeep = keepRows>0?keepRows:kKeepDefault;
+    const int step = trimStep>0? trimStep:kTrimDefault;
+
+    int count = ui->listWidget_UDPServerMsg->count();
+
+    //检查是否需要裁剪
+    if(count<=targetKeep+step){
+        retrun;
+    }
+
+    //计算要删除的项数
+    int removeCount=count-targetKeep;
+
+    if(removeCount>10)
+    {
+        ui->listWidget_UDPServerMsg->setUpdatesEnabled(false);
+    }
+
+    QList<QListWidgetItem *>  itemsToDelete;
+
+//遍历移除前置项
+    for(int i =0; i<removeCount;i++)
+        {
+        QListWidgetItem *item = ui->listWidget_UDPServerMsg->takeItem(0) ;
+        if(item){
+            itemsToDelete.append(item);
+        }
+    }
+
+    if(removeCount>10){
+        ui->listWidget_UDPServerMsg->setUpdatesEnabled(true);
+    }
+
+    //批量删除项对象,释放
+    qDeleteAll(itemsToDelete);
 }
 
 // 窗口关闭事件处理函数：当窗口关闭时自动调用，保存日志并接受关闭
 void FormUDPServer::closeEvent(QCloseEvent *event)
 {
-
+        saveLog();
+    event->accept();
 }
 
 
@@ -416,6 +481,21 @@ void FormUDPServer::closeEvent(QCloseEvent *event)
 // 保存日志列表到文本文件：将QListWidget中的所有项保存到文本文件
 void FormUDPServer::saveListWidgetToFile(QListWidget* listWidget)
 {
+        //第一层检查,验证列表控件指针是否有效
+    if(!listWidget){
+            qWarning()<<"FormUDPServer::saveListToFile::listwight is null";
+        return;
+    }
+    //获取应用程序的标准目录路径
+    //使用appDateLocation的父目录,确保与ini
+    QString appDataPath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+    QDir appDataDir(appDataPath);
+
+    //如果是以路径以应用名称结尾,则使用父目录
+    QString appName = QApplication::applicationName();
+    if(!appName.isEmpty() && (appDataPath.endsWith("/"+appName) ||appDataPath.endsWith("\\"+appName))){
+    }
+
 
 }
 
@@ -424,6 +504,15 @@ void FormUDPServer::saveLog()
 {
 
 }
+
+
+
+
+
+
+
+
+
 
 
 
