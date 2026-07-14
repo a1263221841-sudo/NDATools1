@@ -17,7 +17,7 @@ FormTcpClient::FormTcpClient(QWidget *parent)
     ui->pushButton_TCPClientDisconnect->setEnabled(false);
     ui->pushButton_TCPClientSendMsg->setEnabled(false);
    // ui->listWidget_TCPClientMsg->se
-    ui->checkBox_TCPClientAutoText->setEnabled(false);
+    ui->checkBox_TCPClientAutoTesting->setEnabled(false);
     ui->plainTextEdit_TCPClientSendData->setEnabled(false);
     ui->plainTextEdit_TCPClientSendData->setPlainText("Hello TCP Server");
 
@@ -30,11 +30,11 @@ FormTcpClient::FormTcpClient(QWidget *parent)
 
     ui->comboBox_TCPClientIP->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
     ui->spinBox_TCPClientPort->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
-    ui->checkBox_TCPClientAutoText->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
+    ui->checkBox_TCPClientAutoTesting->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
 
     ui->pushButton_TCPClientConnect->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
     ui->pushButton_TCPClientDisconnect->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
-    ui->pushButton_TCPClientQuit->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
+    ui->pushButton_TCPClientClose->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
     ui->pushButton_TCPClientSendMsg->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
 
     ui->plainTextEdit_TCPClientSendData->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
@@ -127,7 +127,7 @@ FormTcpClient::FormTcpClient(QWidget *parent)
         ui->pushButton_TCPClientDisconnect->setEnabled(true);
         ui->pushButton_TCPClientSendMsg->setEnabled(true);
         ui->listWidget_TCPClientMsg->setEnabled(true);
-        ui->checkBox_TCPClientAutoText->setEnabled(true);
+        ui->checkBox_TCPClientAutoTesting->setEnabled(true);
         ui->plainTextEdit_TCPClientSendData->setEnabled(true);
         connected= true;   //标记已连接
 
@@ -143,7 +143,7 @@ FormTcpClient::FormTcpClient(QWidget *parent)
             ui->pushButton_TCPClientDisconnect->setEnabled(false);
             ui->pushButton_TCPClientSendMsg->setEnabled(false);
             ui->listWidget_TCPClientMsg->setEnabled(false);
-            ui->checkBox_TCPClientAutoText->setEnabled(false);
+            ui->checkBox_TCPClientAutoTesting->setEnabled(false);
             connected= false;   //标记未连接
 
             QString strTemp = QString("[%1]  连接服务器失败: %2")  //失败日志
@@ -251,7 +251,7 @@ void FormTcpClient::on_pushButton_TCPClientDisconnect_clicked()
     ui->pushButton_TCPClientConnect->setEnabled(true);          // 允许重新连接
     ui->pushButton_TCPClientDisconnect->setEnabled(false);      // 禁用断开
     ui->pushButton_TCPClientSendMsg->setEnabled(false);         // 禁用发送
-    ui->checkBox_TCPClientAutoText->setEnabled(false);       // 禁用自动测试
+    ui->checkBox_TCPClientAutoTesting->setEnabled(false);       // 禁用自动测试
     ui->plainTextEdit_TCPClientSendData->setEnabled(false);     // 禁用输入框
     connected = false;                                          // 更新状态
 
@@ -318,12 +318,12 @@ void FormTcpClient::on_pushButton_TCPClientSendMsg_clicked()
 // 自动测试开关：勾选则启用定时发送，取消则恢复手动
 void FormTcpClient::on_checkBox_TCPClientAutoTesting_clicked()
 {
-    bool isAutoTesting = ui->checkBox_TCPClientAutoText->isChecked();  //读取复选框状态
+    bool isAutoTesting = ui->checkBox_TCPClientAutoTesting->isChecked();  //读取复选框状态
 
     if(isAutoTesting){   //开启自动测试
         if(!connected){
             HANDLE_ERROR(ErrorHandler::NetworkError,ErrorHandler::Warning,"未连接服务器,无法开始自动测试",this);
-            ui->checkBox_TCPClientAutoText->setChecked(false);  //回退勾选
+            ui->checkBox_TCPClientAutoTesting->setChecked(false);  //回退勾选
             return;
         }
 
@@ -331,7 +331,7 @@ void FormTcpClient::on_checkBox_TCPClientAutoTesting_clicked()
         QString message = ui->plainTextEdit_TCPClientSendData->toPlainText().trimmed();
         if(message.isEmpty()){
             HANDLE_ERROR(ErrorHandler::ValidationError, ErrorHandler::Warning, "发送内容不能为空，无法开始自动测试！", this);
-            ui->checkBox_TCPClientAutoText->setChecked(false); // 回退勾选
+            ui->checkBox_TCPClientAutoTesting->setChecked(false); // 回退勾选
             return;
         }
 
@@ -379,7 +379,7 @@ void FormTcpClient::enableCommunicationContorols(bool enable)
     ui->pushButton_TCPClientConnect->setEnabled(!enable);       // 启用通信时禁用“连接”
     ui->pushButton_TCPClientDisconnect->setEnabled(enable);     // 启用/禁用“断开”
     ui->pushButton_TCPClientSendMsg->setEnabled(enable);        // 启用/禁用“发送”
-    ui->checkBox_TCPClientAutoText->setEnabled(enable);      // 启用/禁用自动测试
+    ui->checkBox_TCPClientAutoTesting->setEnabled(enable);      // 启用/禁用自动测试
     ui->plainTextEdit_TCPClientSendData->setEnabled(enable);    // 启用/禁用输入框
 
 }

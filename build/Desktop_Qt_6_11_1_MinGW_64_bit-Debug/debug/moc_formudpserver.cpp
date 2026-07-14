@@ -39,9 +39,9 @@ template <> constexpr inline auto FormUDPServer::qt_create_metaobjectdata<qt_met
     namespace QMC = QtMocConstants;
     QtMocHelpers::StringRefStorage qt_stringData {
         "FormUDPServer",
-        "on_pushButton_UDPServerStart_clicked",
+        "on_pushButton_UDPServerStartListen_clicked",
         "",
-        "on_pushButton_UDPServerClose_clicked",
+        "on_pushButton_UDPServerQuit_clicked",
         "on_pushButton_UDPServerSendMsg_clicked",
         "udpSeverReadPendingDatagrams",
         "udpServerAppendStrItem",
@@ -51,9 +51,9 @@ template <> constexpr inline auto FormUDPServer::qt_create_metaobjectdata<qt_met
     };
 
     QtMocHelpers::UintData qt_methods {
-        // Slot 'on_pushButton_UDPServerStart_clicked'
+        // Slot 'on_pushButton_UDPServerStartListen_clicked'
         QtMocHelpers::SlotData<void()>(1, 2, QMC::AccessPrivate, QMetaType::Void),
-        // Slot 'on_pushButton_UDPServerClose_clicked'
+        // Slot 'on_pushButton_UDPServerQuit_clicked'
         QtMocHelpers::SlotData<void()>(3, 2, QMC::AccessPrivate, QMetaType::Void),
         // Slot 'on_pushButton_UDPServerSendMsg_clicked'
         QtMocHelpers::SlotData<void()>(4, 2, QMC::AccessPrivate, QMetaType::Void),
@@ -86,8 +86,8 @@ void FormUDPServer::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _i
     auto *_t = static_cast<FormUDPServer *>(_o);
     if (_c == QMetaObject::InvokeMetaMethod) {
         switch (_id) {
-        case 0: _t->on_pushButton_UDPServerStart_clicked(); break;
-        case 1: _t->on_pushButton_UDPServerClose_clicked(); break;
+        case 0: _t->on_pushButton_UDPServerStartListen_clicked(); break;
+        case 1: _t->on_pushButton_UDPServerQuit_clicked(); break;
         case 2: _t->on_pushButton_UDPServerSendMsg_clicked(); break;
         case 3: _t->udpSeverReadPendingDatagrams(); break;
         case 4: _t->udpServerAppendStrItem((*reinterpret_cast<std::add_pointer_t<int>>(_a[1])),(*reinterpret_cast<std::add_pointer_t<QString>>(_a[2])),(*reinterpret_cast<std::add_pointer_t<bool>>(_a[3]))); break;

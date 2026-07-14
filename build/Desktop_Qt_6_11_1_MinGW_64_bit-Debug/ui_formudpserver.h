@@ -31,7 +31,7 @@ public:
     QGroupBox *groupBox_2;
     QLabel *label_5;
     QLabel *label_6;
-    QSpinBox *spinBox_TCPServerPort;
+    QSpinBox *spinBox_UDPServerPort;
     QPushButton *pushButton_UDPServerStartListen;
     QPushButton *pushButton_UDPServerQuit;
     QPushButton *pushButton_UDPServerSendMsg;
@@ -66,12 +66,12 @@ public:
         label_6->setObjectName("label_6");
         label_6->setGeometry(QRect(10, 90, 121, 21));
         label_6->setFont(font);
-        spinBox_TCPServerPort = new QSpinBox(groupBox_2);
-        spinBox_TCPServerPort->setObjectName("spinBox_TCPServerPort");
-        spinBox_TCPServerPort->setGeometry(QRect(20, 120, 161, 31));
-        spinBox_TCPServerPort->setFont(font);
-        spinBox_TCPServerPort->setMaximum(65535);
-        spinBox_TCPServerPort->setValue(12345);
+        spinBox_UDPServerPort = new QSpinBox(groupBox_2);
+        spinBox_UDPServerPort->setObjectName("spinBox_UDPServerPort");
+        spinBox_UDPServerPort->setGeometry(QRect(20, 120, 161, 31));
+        spinBox_UDPServerPort->setFont(font);
+        spinBox_UDPServerPort->setMaximum(65535);
+        spinBox_UDPServerPort->setValue(12345);
         pushButton_UDPServerStartListen = new QPushButton(groupBox_2);
         pushButton_UDPServerStartListen->setObjectName("pushButton_UDPServerStartListen");
         pushButton_UDPServerStartListen->setGeometry(QRect(20, 170, 161, 51));

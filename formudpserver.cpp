@@ -21,7 +21,7 @@ FormUDPServer::FormUDPServer(QWidget *parent)
 
     //遍历地址列表
     for(const QHostAddress &address:addressList){
-        if(address.protocol()= QAbstractSocket::IPv4Protocol){
+        if(address.protocol()== QAbstractSocket::IPv4Protocol){
             ipList.append(address.toString());
     }
     }
@@ -37,7 +37,7 @@ FormUDPServer::FormUDPServer(QWidget *parent)
     //加载上次保存的配置,从QSetting读取上次的ip和端口
     QSettings settings;
     const QString lastIp = settings.value("UDPServer/lastIp").toString();
-    const int lastPort = settings.value("UDPServer/lastPort",9999).toInt();
+    const int lastPort = settings.value("UDPServer/lastPort",12345).toInt();
 
     if(!lastIp.isEmpty()){
         int index = ui->comboBox_UDPServerIp->findText(lastIp);
@@ -192,15 +192,15 @@ FormUDPServer::~FormUDPServer()
     }
 
     qDebug()<<"FormUdpServer析构函数结束";
-    }
 }
+
 
 
 //启动停止按扭职责
 //点击事件:切换成udp监听状态
 // 启动/停止服务器按钮点击事件：切换UDP服务器的监听状态
 //流程:读取ip地址和端口,验证输入有效性,启动监听,停止监听,更新文本按扭状态,保存配置到QSettings
-void FormUDPServer::on_pushButton_UDPServerStart_clicked()
+void FormUDPServer::on_pushButton_UDPServerStartListen_clicked()
 {
     //获取ip地址
     QString ip = ui->comboBox_UDPServerIp->currentText();
@@ -277,7 +277,7 @@ void FormUDPServer::on_pushButton_UDPServerStart_clicked()
 }
 
 // 关闭按钮点击事件：保存日志并退出应用程序
-void FormUDPServer::on_pushButton_UDPServerClose_clicked()
+void FormUDPServer::on_pushButton_UDPServerQuit_clicked()
 {
     saveListWidgetToFile(ui->listWidget_UDPServerMsg);
 
@@ -439,7 +439,7 @@ void FormUDPServer::trimLog(int keepRows,int trimStep)
 
     //检查是否需要裁剪
     if(count<=targetKeep+step){
-        retrun;
+        return;
     }
 
     //计算要删除的项数
@@ -494,15 +494,90 @@ void FormUDPServer::saveListWidgetToFile(QListWidget* listWidget)
     //如果是以路径以应用名称结尾,则使用父目录
     QString appName = QApplication::applicationName();
     if(!appName.isEmpty() && (appDataPath.endsWith("/"+appName) ||appDataPath.endsWith("\\"+appName))){
+        QDir parentDir = appDataDir;
+        if(parentDir.cdUp()){
+            appDataPath= parentDir.absolutePath();
+        }
     }
+    //确定目录是否存在,如果目录不存在,则创建目录(包含所有父目录)
+    QDir().mkpath(appDataPath);
+    //构建文件完整路径
+    QString fileName = QDir(appDataPath).filePath("UDPServerLogFile.txt");
 
+    //检查文件是否存在,决定是否是追加还是写入模式
+    bool fileExists = QFile::exists(fileName);
+
+    QIODevice::OpenMode openMode = fileExists ? (QIODevice::Append | QIODevice::Text):
+                                                (QIODevice::WriteOnly | QIODevice::Text);
+
+    //创建文件对象
+    QFile file(fileName);
+
+    //打开文件以指定的模式打开文件
+    if(file.open(openMode)){
+        QTextStream out(&file);
+
+
+#if QT_VERSION < QT_VERSION_CHECK(6,0,0)
+    out.setCodec("UTF-8");
+#else
+    out.setEncoding(QStringConverter::Utf8);
+#endif
+
+    //如果是追加模式,写入分隔符和时间戳,区分不同保存传话日志
+    if(file.exists())
+{
+        QString timestamp=QDateTime::currentDateTime().toString("yyyy-mm-dd hh:mm:ss");
+
+
+        //写入分隔符和事件戳:在追加的日志前添加分割线,便于区分不同的会话
+        //条件编译,Qt5 和Qt6不同
+#if QT_VERSION<QT_VERSION_CHECK(6,0,0)
+        out<< "\n" <<"========="<<timestamp<<"==========" <<endl;
+#else
+        out<< "\n"<<"=========="<<timestamp<<"=========="<<Qt::endl;
+#endif
+        //遍历列表项并写入文件:将所有列表项的文本内容写入文件
+        for(int i =0; i<listWidget->count();i++){
+            QListWidgetItem *item = listWidget->item(i);
+            if(item){
+                // 写入列表项文本：将列表项的文本内容写入文件，每项一行
+                                   // text()：返回列表项显示的文本内容
+                                   // 条件编译：Qt5 和 Qt6的换行符常量不同
+               #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+                                   out << item->text() << endl;
+               #else
+                                   out << item->text() << Qt::endl;
+               #endif
+                               }
+                           }
+                file.close();
+
+                qDebug()<<"UDP服务器日志已保存到:"<<fileName;
+
+                if(this->isVisible()){
+                    QMessageBox::information(this,"成功",QString("日志已保存到%1").arg(fileName));
+            }
+        }
+    else{//文件打开失败
+        qWarning()<<"UDP服务器日志保存失败"<<file.errorString();
+
+        //显示错误消息框:如果窗口可见,显示错误提示
+        if(this->isVisible()){
+            QMessageBox::critical(this,"错误","保存失败"+file.errorString());
+        }
+    }
+    }
 
 }
 
 // 保存日志函数：保存当前界面的日志列表到文件（便捷掊）
 void FormUDPServer::saveLog()
 {
-
+    //检查ui对象和列表控件是否存在:防御性编程:确保对象有效后再使用
+    if(ui && ui->listWidget_UDPServerMsg){
+        saveListWidgetToFile(ui->listWidget_UDPServerMsg);
+    }
 }
 
 

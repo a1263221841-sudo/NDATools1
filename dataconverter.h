@@ -1,0 +1,102 @@
+//数据转换与校验核心功能
+//核心功能
+//进制转换
+//数据校验(支持CRC16,CRC32,MD5,SHA1,SHA256
+//数据统计,统计字符串的字符数与UTF-8编码之后的字节数
+
+/*特点
+ * 纯静态工具类,无需实例化,即可使用,
+ * 使用查找表优化CRC计算性能
+ * 统计的错误处理机制
+ * 支持大数据的异步处理
+*/
+#ifndef DATACONVERTER_H
+#define DATACONVERTER_H
+
+#include <QString>
+#include <QByteArray>
+#include <QCrpyptographicHash>
+#include <QRegularExpression>
+#include <QtGlobal>
+#include <QDebug>
+
+#ifdef _MSC_VER
+#pragma execution_character_set("UTF-8")
+#endif
+
+
+
+class DataConverter
+{
+public:
+    struct ConversionResult{
+        bool success;
+        QString data;
+        QString errorMessage;
+
+        //ConversionResult构造函数
+        ConversionResult(bool ok=true,const QString &result=QString(),
+                         const QString &error=QString()):
+            success(ok) ,data(result),errorMessage(error){}
+    };
+
+    //校验值结果结构体
+    struct CheckResult
+    {
+        QString crc16;
+        QString cre32;
+        QString md5;
+        QString sha1;
+        QString sha256;
+    };
+
+    //进制转换功能
+    //十进制->2进制
+    static CoversionResult decimalToBinary (const QString &decimalString);
+
+    //2->十进制
+    static ConversionResult binaryToDecimal(const QString &binaryString);
+
+
+    //数据统计功能
+    //统计字符串的字符数
+    static int countBytes(const QString &data);
+    static int countCharacter(const QString &data);
+    static QString getDataInfo(const QString &data);
+
+
+    //校验值计算功能
+    static CheckResult calulateChecksums(const QString &data);
+    // 计算所有常用校验值（字节数组输入版本）
+        static ChecksumResult calculateChecksumsFromBytes(const QByteArray &data);
+
+        // 单独计算MD5哈希值
+        static QString calculateMD5(const QString &data);
+
+        // 单独计算SHA1哈希值
+        static QString calculateSHA1(const QString &data);
+
+        // 单独计算SHA256哈希值
+        static QString calculateSHA256(const QString &data);
+
+        // 计算CRC16校验值
+        static quint16 calculateCRC16(const QByteArray &data);
+
+        // 计算CRC32校验值
+        static quint32 calculateCRC32(const QByteArray &data);
+
+public:
+
+    DataConverter()=default;
+
+    // CRC16查找表（256项）
+        // 使用 CRC-16-CCITT 标准
+        static const quint16 crc16Table[256];
+
+        // CRC32查找表（256项）
+        // 使用 IEEE 802.3 标准
+        static const quint32 crc32Table[256];
+
+};
+
+#endif // DATACONVERTER_H

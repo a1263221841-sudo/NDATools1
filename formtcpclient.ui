@@ -172,7 +172,7 @@
       <normaloff>:/new/prefix1/images/disconnect.ico</normaloff>:/new/prefix1/images/disconnect.ico</iconset>
     </property>
    </widget>
-   <widget class="QPushButton" name="pushButton_TCPClientQuit">
+   <widget class="QPushButton" name="pushButton_TCPClientClose">
     <property name="geometry">
      <rect>
       <x>20</x>
@@ -274,7 +274,7 @@
       <normaloff>:/new/prefix1/images/sendmsg2.ico</normaloff>:/new/prefix1/images/sendmsg2.ico</iconset>
     </property>
    </widget>
-   <widget class="QCheckBox" name="checkBox_TCPClientAutoText">
+   <widget class="QCheckBox" name="checkBox_TCPClientAutoTesting">
     <property name="geometry">
      <rect>
       <x>10</x>

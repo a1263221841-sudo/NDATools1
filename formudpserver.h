@@ -45,10 +45,10 @@ public:
 
 private slots:
     // 启动/停止服务器按钮点击事件：切换UDP服务器的监听状态
-    void on_pushButton_UDPServerStart_clicked();
+    void on_pushButton_UDPServerStartListen_clicked();
 
     // 关闭按钮点击事件：保存日志并退出应用程序
-    void on_pushButton_UDPServerClose_clicked();
+    void on_pushButton_UDPServerQuit_clicked();
 
     // 发送测试消息按钮点击事件：向最近连接的客户端发送测试消息
     void on_pushButton_UDPServerSendMsg_clicked();

@@ -35,12 +35,12 @@ public:
     QSpinBox *spinBox_TCPClientPort;
     QPushButton *pushButton_TCPClientConnect;
     QPushButton *pushButton_TCPClientDisconnect;
-    QPushButton *pushButton_TCPClientQuit;
+    QPushButton *pushButton_TCPClientClose;
     QComboBox *comboBox_TCPClientIP;
     QGroupBox *groupBox_3;
     QPlainTextEdit *plainTextEdit_TCPClientSendData;
     QPushButton *pushButton_TCPClientSendMsg;
-    QCheckBox *checkBox_TCPClientAutoText;
+    QCheckBox *checkBox_TCPClientAutoTesting;
 
     void setupUi(QWidget *FormTcpClient)
     {
@@ -90,13 +90,13 @@ public:
         QIcon icon1;
         icon1.addFile(QString::fromUtf8(":/new/prefix1/images/disconnect.ico"), QSize(), QIcon::Mode::Normal, QIcon::State::Off);
         pushButton_TCPClientDisconnect->setIcon(icon1);
-        pushButton_TCPClientQuit = new QPushButton(groupBox_2);
-        pushButton_TCPClientQuit->setObjectName("pushButton_TCPClientQuit");
-        pushButton_TCPClientQuit->setGeometry(QRect(20, 280, 161, 51));
-        pushButton_TCPClientQuit->setFont(font);
+        pushButton_TCPClientClose = new QPushButton(groupBox_2);
+        pushButton_TCPClientClose->setObjectName("pushButton_TCPClientClose");
+        pushButton_TCPClientClose->setGeometry(QRect(20, 280, 161, 51));
+        pushButton_TCPClientClose->setFont(font);
         QIcon icon2;
         icon2.addFile(QString::fromUtf8(":/new/prefix1/images/exit.ico"), QSize(), QIcon::Mode::Normal, QIcon::State::Off);
-        pushButton_TCPClientQuit->setIcon(icon2);
+        pushButton_TCPClientClose->setIcon(icon2);
         comboBox_TCPClientIP = new QComboBox(groupBox_2);
         comboBox_TCPClientIP->addItem(QString());
         comboBox_TCPClientIP->setObjectName("comboBox_TCPClientIP");
@@ -117,10 +117,10 @@ public:
         QIcon icon3;
         icon3.addFile(QString::fromUtf8(":/new/prefix1/images/sendmsg2.ico"), QSize(), QIcon::Mode::Normal, QIcon::State::Off);
         pushButton_TCPClientSendMsg->setIcon(icon3);
-        checkBox_TCPClientAutoText = new QCheckBox(groupBox_3);
-        checkBox_TCPClientAutoText->setObjectName("checkBox_TCPClientAutoText");
-        checkBox_TCPClientAutoText->setGeometry(QRect(10, 160, 191, 23));
-        checkBox_TCPClientAutoText->setFont(font);
+        checkBox_TCPClientAutoTesting = new QCheckBox(groupBox_3);
+        checkBox_TCPClientAutoTesting->setObjectName("checkBox_TCPClientAutoTesting");
+        checkBox_TCPClientAutoTesting->setGeometry(QRect(10, 160, 191, 23));
+        checkBox_TCPClientAutoTesting->setFont(font);
 
         retranslateUi(FormTcpClient);
 
@@ -136,12 +136,12 @@ public:
         label_2->setText(QCoreApplication::translate("FormTcpClient", "\350\277\234\347\250\213\344\270\273\346\234\272\347\253\257\345\217\243:", nullptr));
         pushButton_TCPClientConnect->setText(QCoreApplication::translate("FormTcpClient", "\350\277\236\346\216\245\346\234\215\345\212\241\345\231\250", nullptr));
         pushButton_TCPClientDisconnect->setText(QCoreApplication::translate("FormTcpClient", "\346\226\255\345\274\200\346\234\215\345\212\241\345\231\250", nullptr));
-        pushButton_TCPClientQuit->setText(QCoreApplication::translate("FormTcpClient", "\351\200\200\345\207\272\347\250\213\345\272\217", nullptr));
+        pushButton_TCPClientClose->setText(QCoreApplication::translate("FormTcpClient", "\351\200\200\345\207\272\347\250\213\345\272\217", nullptr));
         comboBox_TCPClientIP->setItemText(0, QCoreApplication::translate("FormTcpClient", "127.0.0.1", nullptr));
 
         groupBox_3->setTitle(QCoreApplication::translate("FormTcpClient", "\345\256\242\346\210\267\347\253\257\346\265\213\350\257\225\346\266\210\346\201\257", nullptr));
         pushButton_TCPClientSendMsg->setText(QCoreApplication::translate("FormTcpClient", "\345\217\221\351\200\201\346\266\210\346\201\257", nullptr));
-        checkBox_TCPClientAutoText->setText(QCoreApplication::translate("FormTcpClient", "\350\207\252\345\212\250\345\214\226\346\265\213\350\257\225", nullptr));
+        checkBox_TCPClientAutoTesting->setText(QCoreApplication::translate("FormTcpClient", "\350\207\252\345\212\250\345\214\226\346\265\213\350\257\225", nullptr));
     } // retranslateUi
 
 };
