@@ -14,6 +14,7 @@
 #include <QtWidgets/QApplication>
 #include <QtWidgets/QTabWidget>
 #include <QtWidgets/QWidget>
+#include "formdataprocessor.h"
 #include "formtcpclient.h"
 #include "formtcpserver.h"
 #include "formudpclient.h"
@@ -29,7 +30,7 @@ public:
     FormTcpClient *tab_TCPClient;
     FormUDPServer *tab_UDPServer;
     FormUDPClient *tab_UDPClient;
-    QWidget *tab_DataExchange;
+    FormdataProcessor *tab_DataExchange;
 
     void setupUi(QWidget *MainWidget)
     {
@@ -58,7 +59,7 @@ public:
         tab_UDPClient = new FormUDPClient();
         tab_UDPClient->setObjectName("tab_UDPClient");
         tab_Widget->addTab(tab_UDPClient, icon2, QString());
-        tab_DataExchange = new QWidget();
+        tab_DataExchange = new FormdataProcessor();
         tab_DataExchange->setObjectName("tab_DataExchange");
         QIcon icon3;
         icon3.addFile(QString::fromUtf8(":/new/prefix1/images/sendmsg.ico"), QSize(), QIcon::Mode::Normal, QIcon::State::Off);
@@ -66,7 +67,7 @@ public:
 
         retranslateUi(MainWidget);
 
-        tab_Widget->setCurrentIndex(3);
+        tab_Widget->setCurrentIndex(4);
 
 
         QMetaObject::connectSlotsByName(MainWidget);

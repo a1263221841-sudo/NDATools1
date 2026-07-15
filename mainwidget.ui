@@ -27,7 +27,7 @@
     </rect>
    </property>
    <property name="currentIndex">
-    <number>3</number>
+    <number>4</number>
    </property>
    <widget class="FormTcpServer" name="tab_TCPServer">
     <attribute name="icon">
@@ -65,7 +65,7 @@
      <string>UDP客户端</string>
     </attribute>
    </widget>
-   <widget class="QWidget" name="tab_DataExchange">
+   <widget class="FormdataProcessor" name="tab_DataExchange">
     <attribute name="icon">
      <iconset resource="images.qrc">
       <normaloff>:/new/prefix1/images/sendmsg.ico</normaloff>:/new/prefix1/images/sendmsg.ico</iconset>
@@ -99,6 +99,12 @@
    <class>FormUDPClient</class>
    <extends>QWidget</extends>
    <header>formudpclient.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>FormdataProcessor</class>
+   <extends>QWidget</extends>
+   <header>formdataprocessor.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

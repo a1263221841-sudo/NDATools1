@@ -110,7 +110,7 @@ DataConverter::ConversionResult DataConverter::decimalToBinary (const QString &d
 
     //步骤4,二进制转换
     QString result;
-    if(decimalString==0){
+    if(decimalValue==0){
         //特殊情况零值
         result = "0";
     }else if(decimalValue>0){
@@ -118,7 +118,7 @@ DataConverter::ConversionResult DataConverter::decimalToBinary (const QString &d
     }else{
         //负数:转换为32位无符号数,(补码表示)
         quint32 unsignedValue = static_cast<quint32>(decimalValue);
-        result =QString::number(unsignedValue,2).rightJustified(32,"0");
+        result =QString::number(unsignedValue,2).rightJustified(32,'0');
     }
 
     //格式化输出,按8位一组用空格分隔
@@ -173,43 +173,106 @@ DataConverter::ConversionResult DataConverter::binaryToDecimal(const QString &bi
      //转换成utf-8编码字节数组,返回字节数组的长度
     return data.toUtf8().size();
 }
- //获取字符串统计信息
-int DataConverter::countCharacter(const QString &data)
-{
 
-}
  QString DataConverter:: getDataInfo(const QString &data)
 {
 
+    //获取字节数  (Unicode字节数)
+     int chars = countCharacter(data);
+    //获取字节数(utf-8字节数)
+     int bytes = countBytes(data);
+     return QStringLiteral("字符数: %1,字节数:%2").arg(chars).arg(bytes);
 }
 
 
 //校验值计算功能
-DataConverter::CheckResult calulateChecksums(const QString &data)
+DataConverter::ChecksumResult DataConverter::calulateChecksums(const QString &data)
 {
-
+    //将字符转换
+    QByteArray bytes = data.toUtf8();
+    return calculateChecksumsFromBytes(bytes);
 }
 // 计算所有常用校验值（字节数组输入版本）
-DataConverter::ChecksumResult calculateChecksumsFromBytes(const QByteArray &data)
-    {
+// 该函数功能：一次性计算CRC16、CRC32、MD5、SHA1、SHA256五种校验值
+// 所有校验值都以十六进制字符串形式返回
+/*
+ 1. 计算CRC16：使用查找表算法，结果格式化为4位十六进制（高位补零）
+ 2. 计算CRC32：使用查找表算法，结果格式化为8位十六进制（高位补零）
+ 3. 计算MD5：使用Qt的QCryptographicHash，结果格式化为32位十六进制
+ 4. 计算SHA1：使用Qt的 QCryptographicHash，结果格式化为40位十六进制
+ 5. 计算SHA256：使用Qt的 QCryptographicHash，结果格式化为64位十六进制
+*/
+DataConverter::ChecksumResult DataConverter::calculateChecksumsFromBytes(const QByteArray &data)
+{
+    ChecksumResult result;
+    result.crc16= QString::number(calculateCRC16(data),16).toUpper().rightJustified(4,'0');
+    result.crc32 = QString::number(calculateCRC32(data),16).toUpper().rightJustified(8,'0');
+    result.md5 = QCryptographicHash::hash(data,QCryptographicHash::Md5).toHex().toUpper();
+    result.sha1 = QCryptographicHash::hash(data, QCryptographicHash::Sha1).toHex().toUpper();
+        result.sha256 = QCryptographicHash::hash(data, QCryptographicHash::Sha256).toHex().toUpper();
+    return result;
+}
 
-    }
+// 单独计算MD5哈希值
+QString DataConverter:: calculateMD5(const QString &data)
+{
+    // 将字符串转换为UTF-8编码的字节数组
+      QByteArray bytes=data.toUtf8();
 
-    // 单独计算MD5哈希值
-DataConverter::QString calculateMD5(const QString &data)
-    {
+      // 计算MD5哈希值并转换为十进制大写字符串
+      return QCryptographicHash::hash(bytes, QCryptographicHash::Md5).toHex().toUpper();
 
-    }
+}
 
     // 单独计算SHA1哈希值
-DataConverter::QString calculateSHA1(const QString &data)
-    {
+QString DataConverter:: calculateSHA1(const QString &data)
+{
+    // 将字符串转换为UTF-8编码的字节数组
+     QByteArray bytes=data.toUtf8();
 
-    }
+     return QCryptographicHash::hash(bytes, QCryptographicHash::Sha1).toHex().toUpper();
+
+}
 
     // 单独计算SHA256哈希值
-DataConverter:: QString calculateSHA256(const QString &data)
-    {
+QString DataConverter:: calculateSHA256(const QString &data)
+{
+    // 将字符串转换为UTF-8编码的字节数组
+       QByteArray bytes=data.toUtf8();
 
+       return QCryptographicHash::hash(bytes, QCryptographicHash::Sha256).toHex().toUpper();
+
+}
+
+// 计算CRC16校验值
+ quint16 DataConverter::calculateCRC16(const QByteArray &data)
+{
+    quint16 crc =0xFFFF;
+    //遍历输入数据的每个字节数
+    for(int i= 0; i<data.size();i++){
+        quint8 byte = static_cast<quint8>(data[i]);
+        // 查找表算法
+                // ^ 异或 相同为0，不同为1
+                crc = (crc << 8) ^ crc16Table[((crc >> 8) ^ byte) & 0xFF];
     }
+    return crc;
+}
 
+// 计算CRC32校验值
+quint32 DataConverter::calculateCRC32(const QByteArray &data)
+{
+    quint32 crc=0xFFFFFFFF;
+    for (int i=0; i<data.size();i++){
+        quint8 byte = static_cast<quint8>(data[i]);
+        //查找表算法
+        crc = (crc>>8) ^crc32Table[(crc ^byte) &0xFF];
+    }
+    return crc;
+}
+
+//获取字符串统计信息
+int DataConverter::countCharacter(const QString &data)
+{
+   //返回字节数
+   return data.length();
+}

@@ -15,7 +15,7 @@
 
 #include <QString>
 #include <QByteArray>
-#include <QCrpyptographicHash>
+#include <QCryptographicHash>
 #include <QRegularExpression>
 #include <QtGlobal>
 #include <QDebug>
@@ -41,10 +41,10 @@ public:
     };
 
     //校验值结果结构体
-    struct CheckResult
+    struct ChecksumResult
     {
         QString crc16;
-        QString cre32;
+        QString crc32;
         QString md5;
         QString sha1;
         QString sha256;
@@ -52,7 +52,7 @@ public:
 
     //进制转换功能
     //十进制->2进制
-    static CoversionResult decimalToBinary (const QString &decimalString);
+    static ConversionResult decimalToBinary (const QString &decimalString);
 
     //2->十进制
     static ConversionResult binaryToDecimal(const QString &binaryString);
@@ -66,7 +66,7 @@ public:
 
 
     //校验值计算功能
-    static CheckResult calulateChecksums(const QString &data);
+    static ChecksumResult calulateChecksums(const QString &data);
     // 计算所有常用校验值（字节数组输入版本）
         static ChecksumResult calculateChecksumsFromBytes(const QByteArray &data);
 

@@ -1,4 +1,8 @@
+debug/dataconverter.o
 debug/errorhandler.o
+debug/formchilddataprocessor.o
+debug/formchilddatavalidation.o
+debug/formdataprocessor.o
 debug/formtcpclient.o
 debug/formtcpserver.o
 debug/formudpclient.o
@@ -9,6 +13,9 @@ debug/mainwidget.o
 debug/network.o
 debug/qrc_images.o
 debug/moc_errorhandler.o
+debug/moc_formchilddataprocessor.o
+debug/moc_formchilddatavalidation.o
+debug/moc_formdataprocessor.o
 debug/moc_formtcpclient.o
 debug/moc_formtcpserver.o
 debug/moc_formudpclient.o

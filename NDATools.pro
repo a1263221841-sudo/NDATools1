@@ -13,6 +13,9 @@ CONFIG += c++17
 SOURCES += \
     dataconverter.cpp \
     errorhandler.cpp \
+    formchilddataprocessor.cpp \
+    formchilddatavalidation.cpp \
+    formdataprocessor.cpp \
     formtcpclient.cpp \
     formtcpserver.cpp \
     formudpclient.cpp \
@@ -25,6 +28,9 @@ SOURCES += \
 HEADERS += \
     dataconverter.h \
     errorhandler.h \
+    formchilddataprocessor.h \
+    formchilddatavalidation.h \
+    formdataprocessor.h \
     formtcpclient.h \
     formtcpserver.h \
     formudpclient.h \
@@ -34,6 +40,9 @@ HEADERS += \
     network.h
 
 FORMS += \
+    formchilddataprocessor.ui \
+    formchilddatavalidation.ui \
+    formdataprocessor.ui \
     formtcpclient.ui \
     formtcpserver.ui \
     formudpclient.ui \
