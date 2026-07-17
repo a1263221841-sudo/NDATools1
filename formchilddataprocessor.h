@@ -110,7 +110,7 @@ private:
     void trimLog();
 
     //保存纯文本编辑框内容到文件
-    void savePlainTextEditToFile(QPlianTextEdit *plaintTextEdit);
+    void savePlainTextEditToFile(QPlainTextEdit *plaintTextEdit);
 
 protected:
     //关闭窗口事件
