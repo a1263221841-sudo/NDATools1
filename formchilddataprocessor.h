@@ -1,42 +1,31 @@
-/*主要功能
- * 进制转换
- * 异步处理
- * 输入防抖
- * 日志记录
- * 统计信息
+/*
+ * 主要功能
+ * 1. 进制转换
+ * 2. 大文本异步处理
+ * 3. 输入防抖统计
+ * 4. 日志记录与落盘
+ * 5. 复制/交换/清空操作
  */
-
 
 #ifndef FORMCHILDDATAPROCESSOR_H
 #define FORMCHILDDATAPROCESSOR_H
 
-#include <QWidget>
 #include <QCloseEvent>
-#include<QString>
-#include <QDebug>
-#include <QtConcurrent>
-#include <QMessageBox>
-#include <QTextEdit>
-#include <QMessageBox>
-#include <QPlainTextEdit>
-#include <QClipboard>
-#include <QTimer>
 #include <QDateTime>
-#include <QStandardItem>
 #include <QDir>
 #include <QFile>
-#include <QTextStream>
+#include <QFutureWatcher>
+#include <QMessageBox>
 #include <QQueue>
-
-
-#if QT_VERSION >= QT_VERSION_CHECK(6,0,0)
-#include <QStringConverter>
-#else
-#include <QTextCodec>
-#endif
-
+#include <QStandardPaths>
+#include <QTextEdit>
+#include <QTextStream>
+#include <QTimer>
+#include <QWidget>
+#include <QtConcurrent>
 
 #include "dataconverter.h"
+
 namespace Ui {
 class FormChildDataProcessor;
 }
@@ -49,71 +38,34 @@ public:
     explicit FormChildDataProcessor(QWidget *parent = nullptr);
     ~FormChildDataProcessor();
 
-    //保存日志,(公共接口,提供主窗口调用)
     void saveLog();
 
 private slots:
-    void on_pushButton_CoversionOperation_clicked();
-    void on_copyButton_clicked();
-    void on_swapButton_clicked();
-    void on_clearButton_clicked();
-
-    //异步转换完成槽函数
-void onConversionFinished();
-
-
-//输入文本变化槽函数
-void opInputTextChanged();
-
-void on_pushButton_CoversionOpration_clicked();
+    void on_pushButton_CoversionOpration_clicked();
+    void on_pushButton_CoversionCopyResult_clicked();
+    void on_pushButton_Change_clicked();
+    void on_pushButton_DeclearData_clicked();
+    void onConversionFinished();
+    void opInputTextChanged();
 
 private:
     Ui::FormChildDataProcessor *ui;
-
-    //转换运行状态槽函数
-    bool ConversionRunning =false;
-
-    //输入更新防抖定时器
-    QTimer *inputUpdateTimer;
-
-    //日志条目队列
+    bool conversionRunning = false;
+    QTimer *inputUpdateTimer = nullptr;
     QQueue<QString> logEntries;
-
-    //统一消息提示函数
-    void showMessage(const QString &message,bool isError =false);
-
-    //异步转换监视器
     QFutureWatcher<DataConverter::ConversionResult> conversionWatcher;
 
-    //设置转换忙状态
+    void showMessage(const QString &message, bool isError = false);
     void setConversionBusy(bool busy);
-
-    //展示转换结果或错误信息
-    void showResult(const DataConverter::ConversionResult &result,QTextEdit &outputEdit);
-
-    //更新输入统计信息
-    void updateInputInfo(const QString &text);
-
-    //更新输出统计信息
-    void updateOutputInfo(const QString &text);
-
-    //复制文本到粘贴板
+    void showResult(const DataConverter::ConversionResult &result, QTextEdit *outputEdit);
+    void updateInputInfo(const QString &text = QString());
+    void updateOutputInfo(const QString &text = QString());
     void copyToClipboard(const QString &text);
-
-    //连接所有信号与槽
     void connectSignals();
-
-    //追加日志条目
     void appendLog(const QString &message);
-
-    //裁剪日志
     void trimLog();
 
-    //保存纯文本编辑框内容到文件
-    void savePlainTextEditToFile(QPlainTextEdit *plaintTextEdit);
-
 protected:
-    //关闭窗口事件
     void closeEvent(QCloseEvent *event) override;
 };
 

@@ -16,6 +16,7 @@ SOURCES += \
     formchilddataprocessor.cpp \
     formchilddatavalidation.cpp \
     formdataprocessor.cpp \
+    formprotocoltools.cpp \
     formtcpclient.cpp \
     formtcpserver.cpp \
     formudpclient.cpp \
@@ -31,6 +32,7 @@ HEADERS += \
     formchilddataprocessor.h \
     formchilddatavalidation.h \
     formdataprocessor.h \
+    formprotocoltools.h \
     formtcpclient.h \
     formtcpserver.h \
     formudpclient.h \

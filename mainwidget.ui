@@ -17,17 +17,56 @@
    <iconset resource="images.qrc">
     <normaloff>:/new/prefix1/images/NDALogo.ico</normaloff>:/new/prefix1/images/NDALogo.ico</iconset>
   </property>
+  <widget class="QLabel" name="label_ThemeTitle">
+   <property name="geometry">
+    <rect>
+     <x>570</x>
+     <y>12</y>
+     <width>101</width>
+     <height>24</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>界面主题:</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_CurrentTheme">
+   <property name="geometry">
+    <rect>
+     <x>650</x>
+     <y>12</y>
+     <width>81</width>
+     <height>24</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>浅色模式</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="pushButton_ThemeToggle">
+   <property name="geometry">
+    <rect>
+     <x>740</x>
+     <y>8</y>
+     <width>141</width>
+     <height>32</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>切换到深色模式</string>
+   </property>
+  </widget>
   <widget class="QTabWidget" name="tab_Widget">
    <property name="geometry">
     <rect>
      <x>10</x>
-     <y>10</y>
+     <y>45</y>
      <width>881</width>
-     <height>581</height>
+     <height>545</height>
     </rect>
    </property>
    <property name="currentIndex">
-    <number>4</number>
+    <number>5</number>
    </property>
    <widget class="FormTcpServer" name="tab_TCPServer">
     <attribute name="icon">
@@ -74,7 +113,20 @@
      <string>数据处理工具</string>
     </attribute>
    </widget>
+   <widget class="FormProtocolTools" name="tab_ProtocolTools">
+    <attribute name="icon">
+     <iconset resource="images.qrc">
+      <normaloff>:/new/prefix1/images/connect.ico</normaloff>:/new/prefix1/images/connect.ico</iconset>
+    </attribute>
+    <attribute name="title">
+     <string>协议测试工具</string>
+    </attribute>
+   </widget>
   </widget>
+  <zorder>tab_Widget</zorder>
+  <zorder>label_ThemeTitle</zorder>
+  <zorder>label_CurrentTheme</zorder>
+  <zorder>pushButton_ThemeToggle</zorder>
  </widget>
  <customwidgets>
   <customwidget>
@@ -105,6 +157,12 @@
    <class>FormdataProcessor</class>
    <extends>QWidget</extends>
    <header>formdataprocessor.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>FormProtocolTools</class>
+   <extends>QWidget</extends>
+   <header>formprotocoltools.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
