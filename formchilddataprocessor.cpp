@@ -1,5 +1,6 @@
 #include "formchilddataprocessor.h"
 #include "ui_formchilddataprocessor.h"
+#include "logpathhelper.h"
 
 #include <QApplication>
 #include <QClipboard>
@@ -327,18 +328,13 @@ void FormChildDataProcessor::saveLog()
         return;
     }
 
-    QString appDataPath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
-    if (appDataPath.isEmpty()) {
-        qWarning() << "FormChildDataProcessor::saveLog: app data path is empty";
+    const QString logDir = ensureProjectLogDirPath(QStringLiteral("tools"));
+    if (logDir.isEmpty()) {
+        qWarning() << "FormChildDataProcessor::saveLog: log dir path is empty";
         return;
     }
 
-    if (!QDir().mkpath(appDataPath)) {
-        qWarning() << "FormChildDataProcessor::saveLog: failed to create directory" << appDataPath;
-        return;
-    }
-
-    const QString fileName = QDir(appDataPath).filePath(QStringLiteral("DataConversionLogfile.txt"));
+    const QString fileName = QDir(logDir).filePath(QStringLiteral("DataConversionLogfile.txt"));
     QFile file(fileName);
     const bool fileExists = file.exists();
 

@@ -1,5 +1,6 @@
 #include "formchilddatavalidation.h"
 #include "ui_formchilddatavalidation.h"
+#include "logpathhelper.h"
 
 #include <QApplication>
 #include <QClipboard>
@@ -253,18 +254,13 @@ void FormchildDataValidation::saveLog()
         return;
     }
 
-    QString appDataPath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
-    if (appDataPath.isEmpty()) {
-        qWarning() << "FormchildDataValidation::saveLog: app data path is empty";
+    const QString logDir = ensureProjectLogDirPath(QStringLiteral("tools"));
+    if (logDir.isEmpty()) {
+        qWarning() << "FormchildDataValidation::saveLog: log dir path is empty";
         return;
     }
 
-    if (!QDir().mkpath(appDataPath)) {
-        qWarning() << "FormchildDataValidation::saveLog: failed to create directory" << appDataPath;
-        return;
-    }
-
-    const QString fileName = QDir(appDataPath).filePath(QStringLiteral("DataValidationLogfile.txt"));
+    const QString fileName = QDir(logDir).filePath(QStringLiteral("DataValidationLogfile.txt"));
     QFile file(fileName);
     const bool fileExists = file.exists();
 

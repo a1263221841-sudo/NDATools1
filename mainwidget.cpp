@@ -29,8 +29,8 @@ MainWidget::~MainWidget()
 void MainWidget::initApplicationShell()
 {
     setWindowTitle(QStringLiteral("NDA Tools 网络调试助手"));
-    setMinimumSize(1180, 780);
-    resize(1260, 820);
+    setMinimumSize(980, 700);
+    resize(1040, 740);
     createTrayIcon();
     loadSettings();
 }
@@ -50,9 +50,9 @@ void MainWidget::setupMainLayout()
     rootLayout->addLayout(topBarLayout);
     rootLayout->addWidget(ui->tab_Widget, 1);
 
-    ui->pushButton_ThemeToggle->setMinimumHeight(34);
+    ui->pushButton_ThemeToggle->setMinimumHeight(30);
     ui->pushButton_ThemeToggle->setMinimumWidth(150);
-    ui->tab_Widget->setMinimumSize(1120, 700);
+    ui->tab_Widget->setMinimumSize(920, 620);
 }
 
 void MainWidget::createTrayIcon()

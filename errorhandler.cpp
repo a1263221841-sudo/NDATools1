@@ -1,4 +1,5 @@
 #include "errorhandler.h"
+#include "logpathhelper.h"
 
 
 #include <QStandardPaths>    //  获取平台通用的可写路径
@@ -184,26 +185,7 @@ QString ErrorHandler::errorLevelToString(ErrorLevel level)
 //功能:初始化,切换当前日志,创建目录与文件
 void ErrorHandler::initializeLogFile()
 {
-    //目录日志;使用AppDataLocation的父目录,与QSettings配置文件在同一目录
-    // AppDataLocation = %APPDATA%\NDATools\NDATools
-    // 使用父目录 = %APPDATA%\NDATools，与INI文件在同一目录
-    QString appDataPath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
-    QDir appDataDir(appDataPath);  //关联回滚日志
-    QString logDir = appDataPath;
-
-    // 如果路径以应用名称结尾（如 ...\NDATools\NDATools），则使用父目录
-    // 这样日志文件和INI配置文件都在 %APPDATA%\NDATools 目录下
-
-    QString appName= QApplication::applicationName();
-    if(!appName.isEmpty() &&(appDataPath.endsWith("/" +appName) ||appDataPath.endsWith("\\" +appName))){
-        QDir parentDir =appDataPath;
-        if(parentDir.cdUp()){  //进入父目录
-            logDir = parentDir.absolutePath();
-
-        }
-    }
-
-    QDir().mkpath(logDir); //确保目录存在
+    const QString logDir = ensureProjectLogDirPath(QStringLiteral("system"));
 
     qDebug() << "日志文件目录:" << logDir;
     // 日志文件名：按日期分片，比如：NDATools_20260101.log
@@ -258,18 +240,8 @@ void ErrorHandler::reopenForToday_unlocked()
     QString today =QDate::currentDate().toString("yyyyMMdd");  //今日日期
     if(currentLogPath.contains(today)) return ;    //已是今日文件则不切换
 
-    QString appDataPath =QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
-        QDir appDataDir(appDataPath);
-    //如果路径以应用名称结尾,则使用父目录(与initialzeLogFile逻辑一致)
-    QString appName=QApplication::applicationName();
-        if(!appName.isEmpty() && (appDataPath.endsWith("/" +appName) ||appDataPath.endsWith("\\"  +appName))){
-        QDir parentDir =appDataDir;
-            if(parentDir.cdUp()){
-            appDataPath = parentDir.absolutePath();
-            }
-        }
-        QDir().mkpath(appDataPath);   //确保目录存在
-        QString newPath =QString ("%1/NDAssistantTools_%2.log").arg(appDataPath).arg(today); //新日期文件
+    const QString logDir = ensureProjectLogDirPath(QStringLiteral("system"));
+        QString newPath =QString ("%1/NDAssistantTools_%2.log").arg(logDir).arg(today); //新日期文件
 
         logStream->flush();
         logFile->close();

@@ -1,5 +1,6 @@
  #include "formudpclient.h"
 #include "ui_formudpclient.h"
+#include "logpathhelper.h"
 #include <QApplication>
 
 
@@ -281,23 +282,10 @@ void FormUDPClient::savePlainTextEditToFile(QPlainTextEdit * plainTextEdit)
         return;
     }
 
-    //获取配置文件所在目录
-    QString appDataPath= QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
-    QDir appDataDir(appDataPath);
-
-    //如果路径以应用名称结尾,则使用父目录
-    QString appName =QApplication::applicationName();
-    if(!appName.isEmpty() && (appDataPath.endsWith("/" + appName) ||
-        appDataPath.endsWith("\\" + appName))){
-    QDir parentDir = appDataDir;
-    if(parentDir.cdUp()){
-        appDataPath = parentDir.absolutePath();
-    }
-}
-  QDir().mkpath(appDataPath); // 确保目录存在
+    const QString logDir = ensureProjectLogDirPath(QStringLiteral("udp"));
 
     // 在数据目录下拼接日志文件名
-    QString fileName = QDir(appDataPath).filePath("UDPClientLogfile.txt");
+    QString fileName = QDir(logDir).filePath("UDPClientLogfile.txt");
 
     // 根据文件是否已存在决定以追加或覆盖方式打开
     bool fileExists = QFile::exists(fileName);

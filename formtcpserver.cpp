@@ -1,5 +1,6 @@
 #include "formtcpserver.h"
 #include "ui_formtcpserver.h"
+#include "logpathhelper.h"
 #include <QApplication>
 
 // 功能：构造函数，初始化 UI、服务器实例、样式与信号
@@ -406,22 +407,10 @@ void FormTcpServer::saveListWidgetToFile(QListWidget* listwidget)
         return;
     }
 
-    //获取配置文件所在目录(与QSettings配置文件同一目录)
-    //使用AppDataLocation的父目录,确保与iNI文件子同一目录 : %APPDATA%\NDATools
-    QString appDataPath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
-    QDir appDataDir(appDataPath);
-    //如果路径以应用名称结尾,则使用父目录
-    QString appName = QApplication::applicationName();
-    if(!appName.isEmpty() && (appDataPath.endsWith("/" + appName) || appDataPath.endsWith("\\" +appName))){
-        QDir parentDir =appDataDir;
-        if(parentDir.cdUp()){
-            appDataPath= parentDir.absolutePath();
-        }
-    }
-     QDir().mkpath(appDataPath);   //确保目录存在
+    const QString logDir = ensureProjectLogDirPath(QStringLiteral("tcp"));
 
      //使用固定文件名,追加模式
-     QString fileName = QDir(appDataPath).filePath("TCPServerLogfile.txt");
+     QString fileName = QDir(logDir).filePath("TCPServerLogfile.txt");
 
      //检查文件是否存在,决定,是追加还是创建
      bool fileExists = QFile::exists(fileName);

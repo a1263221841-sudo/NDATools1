@@ -1,4 +1,5 @@
 #include "formprotocoltools.h"
+#include "logpathhelper.h"
 
 #include <QCheckBox>
 #include <QComboBox>
@@ -34,6 +35,15 @@
 #endif
 
 namespace {
+constexpr int kProtocolPageMinWidth = 860;
+constexpr int kProtocolPageMinHeight = 560;
+constexpr int kResultPanelMinWidth = 430;
+constexpr int kConfigPanelMinWidth = 280;
+constexpr int kScrollPanelMinWidth = 300;
+constexpr int kActionButtonMinHeight = 28;
+constexpr int kLogEditMinHeight = 250;
+constexpr int kBodyEditMinHeight = 88;
+
 QString nowText()
 {
     return QDateTime::currentDateTime().toString(QStringLiteral("yyyy-MM-dd hh:mm:ss"));
@@ -77,10 +87,13 @@ FormProtocolTools::~FormProtocolTools() = default;
 void FormProtocolTools::buildUi()
 {
     QVBoxLayout *mainLayout = new QVBoxLayout(this);
-    mainLayout->setContentsMargins(10, 10, 10, 10);
-    setMinimumSize(1080, 680);
+    mainLayout->setContentsMargins(6, 6, 6, 6);
+    mainLayout->setSpacing(4);
+    setMinimumSize(kProtocolPageMinWidth, kProtocolPageMinHeight);
 
     protocolTabWidget = new QTabWidget(this);
+    protocolTabWidget->setDocumentMode(true);
+    protocolTabWidget->setUsesScrollButtons(true);
     protocolTabWidget->addTab(createHttpTab(), QStringLiteral("HTTP/HTTPS"));
     protocolTabWidget->addTab(createWebSocketTab(), QStringLiteral("WebSocket"));
     protocolTabWidget->addTab(createMailTab(), QStringLiteral("POP3/IMAP"));
@@ -94,11 +107,12 @@ QWidget *FormProtocolTools::createHttpTab()
 {
     httpUi.page = new QWidget(this);
     QHBoxLayout *rootLayout = new QHBoxLayout(httpUi.page);
-    rootLayout->setSpacing(10);
+    rootLayout->setContentsMargins(4, 4, 4, 4);
+    rootLayout->setSpacing(6);
 
     QGroupBox *resultGroup = new QGroupBox(QStringLiteral("响应结果"), httpUi.page);
     QVBoxLayout *resultLayout = new QVBoxLayout(resultGroup);
-    resultGroup->setMinimumWidth(520);
+    resultGroup->setMinimumWidth(kResultPanelMinWidth);
     httpUi.responseHeadersEdit = new QPlainTextEdit(resultGroup);
     httpUi.responseHeadersEdit->setReadOnly(true);
     httpUi.responseHeadersEdit->setPlaceholderText(QStringLiteral("响应头"));
@@ -113,9 +127,11 @@ QWidget *FormProtocolTools::createHttpTab()
     QWidget *sideWidget = new QWidget(httpUi.page);
     QVBoxLayout *sideLayout = new QVBoxLayout(sideWidget);
     sideLayout->setContentsMargins(0, 0, 0, 0);
+    sideLayout->setSpacing(6);
     QGroupBox *configGroup = new QGroupBox(QStringLiteral("请求设置"), httpUi.page);
     QVBoxLayout *configLayout = new QVBoxLayout(configGroup);
-    configGroup->setMinimumWidth(340);
+    configLayout->setSpacing(4);
+    configGroup->setMinimumWidth(kConfigPanelMinWidth);
     httpUi.methodCombo = new QComboBox(configGroup);
     httpUi.methodCombo->addItems({QStringLiteral("GET"), QStringLiteral("POST"),
                                   QStringLiteral("PUT"), QStringLiteral("DELETE"),
@@ -126,9 +142,9 @@ QWidget *FormProtocolTools::createHttpTab()
     httpUi.headersEdit->setPlaceholderText(QStringLiteral("请求头，每行一项，例如：\nContent-Type: application/json"));
     httpUi.bodyEdit = new QPlainTextEdit(configGroup);
     httpUi.bodyEdit->setPlaceholderText(QStringLiteral("请求体"));
-    httpUi.bodyEdit->setMinimumHeight(120);
+    httpUi.bodyEdit->setMinimumHeight(kBodyEditMinHeight);
     httpUi.sendButton = new QPushButton(QStringLiteral("发送请求"), configGroup);
-    httpUi.sendButton->setMinimumHeight(34);
+    httpUi.sendButton->setMinimumHeight(kActionButtonMinHeight);
     configLayout->addWidget(new QLabel(QStringLiteral("请求方法"), configGroup));
     configLayout->addWidget(httpUi.methodCombo);
     configLayout->addWidget(new QLabel(QStringLiteral("目标 URL"), configGroup));
@@ -144,12 +160,12 @@ QWidget *FormProtocolTools::createHttpTab()
     QVBoxLayout *logLayout = new QVBoxLayout(logGroup);
     httpUi.logEdit = new QPlainTextEdit(logGroup);
     httpUi.logEdit->setReadOnly(true);
-    httpUi.logEdit->setMinimumHeight(150);
+    httpUi.logEdit->setMinimumHeight(120);
     QHBoxLayout *logButtonLayout = new QHBoxLayout();
     httpUi.clearLogButton = new QPushButton(QStringLiteral("清空日志"), logGroup);
     httpUi.saveLogButton = new QPushButton(QStringLiteral("保存日志"), logGroup);
-    httpUi.clearLogButton->setMinimumHeight(34);
-    httpUi.saveLogButton->setMinimumHeight(34);
+    httpUi.clearLogButton->setMinimumHeight(kActionButtonMinHeight);
+    httpUi.saveLogButton->setMinimumHeight(kActionButtonMinHeight);
     logButtonLayout->addWidget(httpUi.clearLogButton);
     logButtonLayout->addWidget(httpUi.saveLogButton);
     logLayout->addWidget(httpUi.logEdit);
@@ -160,7 +176,7 @@ QWidget *FormProtocolTools::createHttpTab()
     sideLayout->addStretch();
 
     QScrollArea *sideScroll = createScrollPanel(sideWidget, httpUi.page);
-    sideScroll->setMinimumWidth(360);
+    sideScroll->setMinimumWidth(kScrollPanelMinWidth);
 
     rootLayout->addWidget(resultGroup, 3);
     rootLayout->addWidget(sideScroll, 2);
@@ -171,19 +187,20 @@ QWidget *FormProtocolTools::createWebSocketTab()
 {
     webSocketUi.page = new QWidget(this);
     QHBoxLayout *rootLayout = new QHBoxLayout(webSocketUi.page);
-    rootLayout->setSpacing(10);
+    rootLayout->setContentsMargins(4, 4, 4, 4);
+    rootLayout->setSpacing(6);
 
     QGroupBox *logGroup = new QGroupBox(QStringLiteral("WebSocket 收发日志"), webSocketUi.page);
     QVBoxLayout *logLayout = new QVBoxLayout(logGroup);
-    logGroup->setMinimumWidth(520);
+    logGroup->setMinimumWidth(kResultPanelMinWidth);
     webSocketUi.logEdit = new QPlainTextEdit(logGroup);
     webSocketUi.logEdit->setReadOnly(true);
-    webSocketUi.logEdit->setMinimumHeight(320);
+    webSocketUi.logEdit->setMinimumHeight(kLogEditMinHeight);
     QHBoxLayout *logButtonLayout = new QHBoxLayout();
     webSocketUi.clearLogButton = new QPushButton(QStringLiteral("清空日志"), logGroup);
     webSocketUi.saveLogButton = new QPushButton(QStringLiteral("保存日志"), logGroup);
-    webSocketUi.clearLogButton->setMinimumHeight(34);
-    webSocketUi.saveLogButton->setMinimumHeight(34);
+    webSocketUi.clearLogButton->setMinimumHeight(kActionButtonMinHeight);
+    webSocketUi.saveLogButton->setMinimumHeight(kActionButtonMinHeight);
     logButtonLayout->addWidget(webSocketUi.clearLogButton);
     logButtonLayout->addWidget(webSocketUi.saveLogButton);
     logLayout->addWidget(webSocketUi.logEdit);
@@ -191,17 +208,18 @@ QWidget *FormProtocolTools::createWebSocketTab()
 
     QGroupBox *configGroup = new QGroupBox(QStringLiteral("连接与发送"), webSocketUi.page);
     QVBoxLayout *configLayout = new QVBoxLayout(configGroup);
-    configGroup->setMinimumWidth(340);
+    configLayout->setSpacing(4);
+    configGroup->setMinimumWidth(kConfigPanelMinWidth);
     webSocketUi.urlEdit = new QLineEdit(QStringLiteral("ws://echo.websocket.events"), configGroup);
     webSocketUi.connectButton = new QPushButton(QStringLiteral("连接"), configGroup);
     webSocketUi.disconnectButton = new QPushButton(QStringLiteral("断开"), configGroup);
     webSocketUi.sendEdit = new QPlainTextEdit(configGroup);
     webSocketUi.sendEdit->setPlaceholderText(QStringLiteral("输入要发送的文本消息"));
-    webSocketUi.sendEdit->setMinimumHeight(180);
+    webSocketUi.sendEdit->setMinimumHeight(110);
     webSocketUi.sendButton = new QPushButton(QStringLiteral("发送消息"), configGroup);
-    webSocketUi.connectButton->setMinimumHeight(34);
-    webSocketUi.disconnectButton->setMinimumHeight(34);
-    webSocketUi.sendButton->setMinimumHeight(34);
+    webSocketUi.connectButton->setMinimumHeight(kActionButtonMinHeight);
+    webSocketUi.disconnectButton->setMinimumHeight(kActionButtonMinHeight);
+    webSocketUi.sendButton->setMinimumHeight(kActionButtonMinHeight);
     webSocketUi.disconnectButton->setEnabled(false);
     webSocketUi.sendButton->setEnabled(false);
     configLayout->addWidget(new QLabel(QStringLiteral("WebSocket 地址"), configGroup));
@@ -219,7 +237,7 @@ QWidget *FormProtocolTools::createWebSocketTab()
     configWrapperLayout->addStretch();
 
     QScrollArea *configScroll = createScrollPanel(configWidget, webSocketUi.page);
-    configScroll->setMinimumWidth(360);
+    configScroll->setMinimumWidth(kScrollPanelMinWidth);
 
     rootLayout->addWidget(logGroup, 3);
     rootLayout->addWidget(configScroll, 2);
@@ -230,19 +248,20 @@ QWidget *FormProtocolTools::createMailTab()
 {
     mailUi.page = new QWidget(this);
     QHBoxLayout *rootLayout = new QHBoxLayout(mailUi.page);
-    rootLayout->setSpacing(10);
+    rootLayout->setContentsMargins(4, 4, 4, 4);
+    rootLayout->setSpacing(6);
 
     QGroupBox *logGroup = new QGroupBox(QStringLiteral("服务器响应日志"), mailUi.page);
     QVBoxLayout *logLayout = new QVBoxLayout(logGroup);
-    logGroup->setMinimumWidth(520);
+    logGroup->setMinimumWidth(kResultPanelMinWidth);
     mailUi.logEdit = new QPlainTextEdit(logGroup);
     mailUi.logEdit->setReadOnly(true);
-    mailUi.logEdit->setMinimumHeight(320);
+    mailUi.logEdit->setMinimumHeight(kLogEditMinHeight);
     QHBoxLayout *logButtonLayout = new QHBoxLayout();
     mailUi.clearLogButton = new QPushButton(QStringLiteral("清空日志"), logGroup);
     mailUi.saveLogButton = new QPushButton(QStringLiteral("保存日志"), logGroup);
-    mailUi.clearLogButton->setMinimumHeight(34);
-    mailUi.saveLogButton->setMinimumHeight(34);
+    mailUi.clearLogButton->setMinimumHeight(kActionButtonMinHeight);
+    mailUi.saveLogButton->setMinimumHeight(kActionButtonMinHeight);
     logButtonLayout->addWidget(mailUi.clearLogButton);
     logButtonLayout->addWidget(mailUi.saveLogButton);
     logLayout->addWidget(mailUi.logEdit);
@@ -250,7 +269,8 @@ QWidget *FormProtocolTools::createMailTab()
 
     QGroupBox *configGroup = new QGroupBox(QStringLiteral("连接与命令"), mailUi.page);
     QVBoxLayout *configLayout = new QVBoxLayout(configGroup);
-    configGroup->setMinimumWidth(340);
+    configLayout->setSpacing(4);
+    configGroup->setMinimumWidth(kConfigPanelMinWidth);
     mailUi.protocolCombo = new QComboBox(configGroup);
     mailUi.protocolCombo->addItems({QStringLiteral("POP3"), QStringLiteral("IMAP")});
     mailUi.hostEdit = new QLineEdit(QStringLiteral("pop.qq.com"), configGroup);
@@ -267,10 +287,10 @@ QWidget *FormProtocolTools::createMailTab()
     mailUi.loginButton = new QPushButton(QStringLiteral("登录"), configGroup);
     mailUi.listButton = new QPushButton(QStringLiteral("列出邮箱内容"), configGroup);
     mailUi.commandButton = new QPushButton(QStringLiteral("发送自定义命令"), configGroup);
-    mailUi.connectButton->setMinimumHeight(34);
-    mailUi.loginButton->setMinimumHeight(34);
-    mailUi.listButton->setMinimumHeight(34);
-    mailUi.commandButton->setMinimumHeight(34);
+    mailUi.connectButton->setMinimumHeight(kActionButtonMinHeight);
+    mailUi.loginButton->setMinimumHeight(kActionButtonMinHeight);
+    mailUi.listButton->setMinimumHeight(kActionButtonMinHeight);
+    mailUi.commandButton->setMinimumHeight(kActionButtonMinHeight);
 
     configLayout->addWidget(new QLabel(QStringLiteral("协议"), configGroup));
     configLayout->addWidget(mailUi.protocolCombo);
@@ -297,7 +317,7 @@ QWidget *FormProtocolTools::createMailTab()
     configWrapperLayout->addStretch();
 
     QScrollArea *configScroll = createScrollPanel(configWidget, mailUi.page);
-    configScroll->setMinimumWidth(360);
+    configScroll->setMinimumWidth(kScrollPanelMinWidth);
 
     rootLayout->addWidget(logGroup, 3);
     rootLayout->addWidget(configScroll, 2);
@@ -308,19 +328,20 @@ QWidget *FormProtocolTools::createMqttTab()
 {
     mqttUi.page = new QWidget(this);
     QHBoxLayout *rootLayout = new QHBoxLayout(mqttUi.page);
-    rootLayout->setSpacing(10);
+    rootLayout->setContentsMargins(4, 4, 4, 4);
+    rootLayout->setSpacing(6);
 
     QGroupBox *logGroup = new QGroupBox(QStringLiteral("MQTT 消息日志"), mqttUi.page);
     QVBoxLayout *logLayout = new QVBoxLayout(logGroup);
-    logGroup->setMinimumWidth(520);
+    logGroup->setMinimumWidth(kResultPanelMinWidth);
     mqttUi.logEdit = new QPlainTextEdit(logGroup);
     mqttUi.logEdit->setReadOnly(true);
-    mqttUi.logEdit->setMinimumHeight(320);
+    mqttUi.logEdit->setMinimumHeight(kLogEditMinHeight);
     QHBoxLayout *logButtonLayout = new QHBoxLayout();
     mqttUi.clearLogButton = new QPushButton(QStringLiteral("清空日志"), logGroup);
     mqttUi.saveLogButton = new QPushButton(QStringLiteral("保存日志"), logGroup);
-    mqttUi.clearLogButton->setMinimumHeight(34);
-    mqttUi.saveLogButton->setMinimumHeight(34);
+    mqttUi.clearLogButton->setMinimumHeight(kActionButtonMinHeight);
+    mqttUi.saveLogButton->setMinimumHeight(kActionButtonMinHeight);
     logButtonLayout->addWidget(mqttUi.clearLogButton);
     logButtonLayout->addWidget(mqttUi.saveLogButton);
     logLayout->addWidget(mqttUi.logEdit);
@@ -328,7 +349,8 @@ QWidget *FormProtocolTools::createMqttTab()
 
     QGroupBox *configGroup = new QGroupBox(QStringLiteral("连接与发布订阅"), mqttUi.page);
     QVBoxLayout *configLayout = new QVBoxLayout(configGroup);
-    configGroup->setMinimumWidth(340);
+    configLayout->setSpacing(4);
+    configGroup->setMinimumWidth(kConfigPanelMinWidth);
     mqttUi.hostEdit = new QLineEdit(QStringLiteral("broker.emqx.io"), configGroup);
     mqttUi.portSpin = new QSpinBox(configGroup);
     mqttUi.portSpin->setMaximum(65535);
@@ -343,15 +365,15 @@ QWidget *FormProtocolTools::createMqttTab()
     mqttUi.qosCombo->addItem(QStringLiteral("QoS 1"), 1);
     mqttUi.payloadEdit = new QPlainTextEdit(configGroup);
     mqttUi.payloadEdit->setPlaceholderText(QStringLiteral("发布消息内容"));
-    mqttUi.payloadEdit->setMinimumHeight(100);
+    mqttUi.payloadEdit->setMinimumHeight(kBodyEditMinHeight);
     mqttUi.connectButton = new QPushButton(QStringLiteral("连接 Broker"), configGroup);
     mqttUi.disconnectButton = new QPushButton(QStringLiteral("断开"), configGroup);
     mqttUi.subscribeButton = new QPushButton(QStringLiteral("订阅主题"), configGroup);
     mqttUi.publishButton = new QPushButton(QStringLiteral("发布消息"), configGroup);
-    mqttUi.connectButton->setMinimumHeight(34);
-    mqttUi.disconnectButton->setMinimumHeight(34);
-    mqttUi.subscribeButton->setMinimumHeight(34);
-    mqttUi.publishButton->setMinimumHeight(34);
+    mqttUi.connectButton->setMinimumHeight(kActionButtonMinHeight);
+    mqttUi.disconnectButton->setMinimumHeight(kActionButtonMinHeight);
+    mqttUi.subscribeButton->setMinimumHeight(kActionButtonMinHeight);
+    mqttUi.publishButton->setMinimumHeight(kActionButtonMinHeight);
     mqttUi.disconnectButton->setEnabled(false);
     mqttUi.subscribeButton->setEnabled(false);
     mqttUi.publishButton->setEnabled(false);
@@ -384,7 +406,7 @@ QWidget *FormProtocolTools::createMqttTab()
     configWrapperLayout->addStretch();
 
     QScrollArea *configScroll = createScrollPanel(configWidget, mqttUi.page);
-    configScroll->setMinimumWidth(360);
+    configScroll->setMinimumWidth(kScrollPanelMinWidth);
 
     rootLayout->addWidget(logGroup, 3);
     rootLayout->addWidget(configScroll, 2);
@@ -395,19 +417,20 @@ QWidget *FormProtocolTools::createModbusTab()
 {
     modbusUi.page = new QWidget(this);
     QHBoxLayout *rootLayout = new QHBoxLayout(modbusUi.page);
-    rootLayout->setSpacing(10);
+    rootLayout->setContentsMargins(4, 4, 4, 4);
+    rootLayout->setSpacing(6);
 
     QGroupBox *logGroup = new QGroupBox(QStringLiteral("Modbus TCP 日志"), modbusUi.page);
     QVBoxLayout *logLayout = new QVBoxLayout(logGroup);
-    logGroup->setMinimumWidth(520);
+    logGroup->setMinimumWidth(kResultPanelMinWidth);
     modbusUi.logEdit = new QPlainTextEdit(logGroup);
     modbusUi.logEdit->setReadOnly(true);
-    modbusUi.logEdit->setMinimumHeight(320);
+    modbusUi.logEdit->setMinimumHeight(kLogEditMinHeight);
     QHBoxLayout *logButtonLayout = new QHBoxLayout();
     modbusUi.clearLogButton = new QPushButton(QStringLiteral("清空日志"), logGroup);
     modbusUi.saveLogButton = new QPushButton(QStringLiteral("保存日志"), logGroup);
-    modbusUi.clearLogButton->setMinimumHeight(34);
-    modbusUi.saveLogButton->setMinimumHeight(34);
+    modbusUi.clearLogButton->setMinimumHeight(kActionButtonMinHeight);
+    modbusUi.saveLogButton->setMinimumHeight(kActionButtonMinHeight);
     logButtonLayout->addWidget(modbusUi.clearLogButton);
     logButtonLayout->addWidget(modbusUi.saveLogButton);
     logLayout->addWidget(modbusUi.logEdit);
@@ -415,7 +438,8 @@ QWidget *FormProtocolTools::createModbusTab()
 
     QGroupBox *configGroup = new QGroupBox(QStringLiteral("连接与读写参数"), modbusUi.page);
     QVBoxLayout *configLayout = new QVBoxLayout(configGroup);
-    configGroup->setMinimumWidth(340);
+    configLayout->setSpacing(4);
+    configGroup->setMinimumWidth(kConfigPanelMinWidth);
     modbusUi.hostEdit = new QLineEdit(QStringLiteral("127.0.0.1"), configGroup);
     modbusUi.portSpin = new QSpinBox(configGroup);
     modbusUi.portSpin->setMaximum(65535);
@@ -439,10 +463,10 @@ QWidget *FormProtocolTools::createModbusTab()
     modbusUi.disconnectButton = new QPushButton(QStringLiteral("断开"), configGroup);
     modbusUi.readButton = new QPushButton(QStringLiteral("读取保持寄存器"), configGroup);
     modbusUi.writeButton = new QPushButton(QStringLiteral("写单个寄存器"), configGroup);
-    modbusUi.connectButton->setMinimumHeight(34);
-    modbusUi.disconnectButton->setMinimumHeight(34);
-    modbusUi.readButton->setMinimumHeight(34);
-    modbusUi.writeButton->setMinimumHeight(34);
+    modbusUi.connectButton->setMinimumHeight(kActionButtonMinHeight);
+    modbusUi.disconnectButton->setMinimumHeight(kActionButtonMinHeight);
+    modbusUi.readButton->setMinimumHeight(kActionButtonMinHeight);
+    modbusUi.writeButton->setMinimumHeight(kActionButtonMinHeight);
     modbusUi.disconnectButton->setEnabled(false);
     modbusUi.readButton->setEnabled(false);
     modbusUi.writeButton->setEnabled(false);
@@ -475,7 +499,7 @@ QWidget *FormProtocolTools::createModbusTab()
     configWrapperLayout->addStretch();
 
     QScrollArea *configScroll = createScrollPanel(configWidget, modbusUi.page);
-    configScroll->setMinimumWidth(360);
+    configScroll->setMinimumWidth(kScrollPanelMinWidth);
 
     rootLayout->addWidget(logGroup, 3);
     rootLayout->addWidget(configScroll, 2);
@@ -1336,9 +1360,7 @@ void FormProtocolTools::saveLogToFile(const QString &moduleName, QPlainTextEdit 
         return;
     }
 
-    const QString logDir = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation)
-                           + QStringLiteral("/ProtocolLogs");
-    QDir().mkpath(logDir);
+    const QString logDir = ensureProjectLogDirPath(QStringLiteral("protocol"));
     const QString fileName = QDir(logDir).filePath(
         QStringLiteral("%1_%2.txt")
             .arg(moduleName, QDateTime::currentDateTime().toString(QStringLiteral("yyyyMMdd_hhmmss"))));

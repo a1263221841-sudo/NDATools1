@@ -1,5 +1,6 @@
 #include "formudpserver.h"
 #include "ui_formudpserver.h"
+#include "logpathhelper.h"
 #include <QApplication>
 
 FormUDPServer::FormUDPServer(QWidget *parent)
@@ -486,23 +487,9 @@ void FormUDPServer::saveListWidgetToFile(QListWidget* listWidget)
             qWarning()<<"FormUDPServer::saveListToFile::listwight is null";
         return;
     }
-    //获取应用程序的标准目录路径
-    //使用appDateLocation的父目录,确保与ini
-    QString appDataPath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
-    QDir appDataDir(appDataPath);
-
-    //如果是以路径以应用名称结尾,则使用父目录
-    QString appName = QApplication::applicationName();
-    if(!appName.isEmpty() && (appDataPath.endsWith("/"+appName) ||appDataPath.endsWith("\\"+appName))){
-        QDir parentDir = appDataDir;
-        if(parentDir.cdUp()){
-            appDataPath= parentDir.absolutePath();
-        }
-    }
-    //确定目录是否存在,如果目录不存在,则创建目录(包含所有父目录)
-    QDir().mkpath(appDataPath);
+    const QString logDir = ensureProjectLogDirPath(QStringLiteral("udp"));
     //构建文件完整路径
-    QString fileName = QDir(appDataPath).filePath("UDPServerLogFile.txt");
+    QString fileName = QDir(logDir).filePath("UDPServerLogFile.txt");
 
     //检查文件是否存在,决定是否是追加还是写入模式
     bool fileExists = QFile::exists(fileName);
