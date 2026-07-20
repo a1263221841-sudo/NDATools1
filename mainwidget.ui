@@ -66,7 +66,7 @@
     </rect>
    </property>
    <property name="currentIndex">
-    <number>5</number>
+    <number>4</number>
    </property>
    <widget class="FormTcpServer" name="tab_TCPServer">
     <attribute name="icon">

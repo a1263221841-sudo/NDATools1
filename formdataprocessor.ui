@@ -35,11 +35,6 @@
      <string>数据校验</string>
     </attribute>
    </widget>
-   <widget class="QWidget" name="tab_5">
-    <attribute name="title">
-     <string>页</string>
-    </attribute>
-   </widget>
   </widget>
  </widget>
  <customwidgets>
